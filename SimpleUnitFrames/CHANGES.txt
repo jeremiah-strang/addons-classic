@@ -1,0 +1,10 @@
+tag d9a6a01c401166280ec872595cb593bd0847ccf6 11302-5
+Author:	Pneumatus <pneumatus@curseforge>
+Date:	Tue Sep 24 09:12:14 2019 +0100
+
+commit 273e78c87dfd2b42a772ea2dc587104cb731815b
+Author: Pneumatus <pneumatus@curseforge>
+Date:   Mon Sep 23 20:39:02 2019 +0100
+
+    Configurable font shadow + font outlines
+
