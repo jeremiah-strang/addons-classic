@@ -273,7 +273,13 @@ local function SetAurasSorted()
 		end
 	else
 		BCT.nextAura = "                 " -- Prevents auto linebreak in enchants line (lua ecksdee)
-   end
+	end
+   
+	local found, blacklisted, tracked = BCT.GetAura(BCT.nextAura:gsub("^%s*(.-)%s*$", "%1"))
+
+	if found and tracked then
+		BCT.nextAura = "|cffff0000" .. BCT.nextAura .. "|r"
+	end
 
 	-- count pushed enchants
     local counter = 32 - (BCT.buffsTotal + BCT.enchantsTotal)
@@ -426,20 +432,20 @@ local function BuildNextFiveString()
 			if BCT.buffs[t] ~= nil then
 				local search = BCT.session.db.auras["auras_visible"]
 				if search[BCT.buffs[t]] ~= nil then
-					return Nth (n) .. ": " .. search[BCT.buffs[t]][1] .. "\n"
+					return Nth (n) .. ": " .. search[BCT.buffs[t]][1]
 				else
-					return Nth (n) .. ": " .. GetSpellInfo(BCT.buffs[t]) .. "\n"
+					return Nth (n) .. ": " .. GetSpellInfo(BCT.buffs[t])
 				end
 				BCT.nextAuraId = t
 			elseif BCT.hidden[t] ~=	 nil then
-				return Nth (n) .. ": " .. BCT.hidden[t] .. "\n"
+				return Nth (n) .. ": " .. BCT.hidden[t]
 			else
 				-- enchant
 				for i=1,19,1 do
 					if BCT.items[i] ~= nil then
 						if BCT.items[i][3] == t then
 							
-							return Nth (n) .. ": " .. BCT.session.db.auras["auras_enchants"][BCT.items[i][2]][1] .. "\n"
+							return Nth (n) .. ": " .. BCT.session.db.auras["auras_enchants"][BCT.items[i][2]][1]
 						end
 					end
 				end
@@ -469,7 +475,7 @@ local function BuildTrackedString()
 		end
 	end
 	if nl then 
-		tmp = BCT.session.db.window.group_lines and tmp or (tmp .. "\n" )
+		tmp = BCT.session.db.window.body.group_lines and tmp or (tmp .. "\n" )
 		nl = false
 	end
 	for k, v in pairs(BCT.session.db.auras["auras_visible"]) do
@@ -479,7 +485,7 @@ local function BuildTrackedString()
 		end
 	end
 	if nl then 
-		tmp = BCT.session.db.window.group_lines and tmp or (tmp .. "\n" )
+		tmp = BCT.session.db.window.body.group_lines and tmp or (tmp .. "\n" )
 		nl = false
 	end
 	for k, v in pairs(BCT.session.db.auras["auras_debuffs"]) do
@@ -489,7 +495,7 @@ local function BuildTrackedString()
 		end
 	end
 	if nl then 
-		tmp = BCT.session.db.window.group_lines and tmp or (tmp .. "\n" )
+		tmp = BCT.session.db.window.body.group_lines and tmp or (tmp .. "\n" )
 		nl = false
 	end
 	for k, v in pairs(BCT.session.db.auras["auras_visible"]) do
@@ -499,7 +505,7 @@ local function BuildTrackedString()
 		end
 	end
 	if nl then 
-		tmp = BCT.session.db.window.group_lines and tmp or (tmp .. "\n" )
+		tmp = BCT.session.db.window.body.group_lines and tmp or (tmp .. "\n" )
 		nl = false
 	end
 	for k, v in pairs(BCT.session.db.auras["auras_visible"]) do
@@ -508,7 +514,11 @@ local function BuildTrackedString()
 			nl = true
 		end
 	end
+	
+	if BCT.session.db.window.text["profile"] and BCT.session.db.window.body.group_lines then
+		tmp = tmp .. "\n"
+	end
 
-    BCT.trackedStr = tmp .. (BCT.session.db.window.group_lines and "\n\n" or "\n")
+    BCT.trackedStr = tmp
 end
 BCT.BuildTrackedString = BuildTrackedString

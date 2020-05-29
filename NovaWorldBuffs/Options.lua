@@ -153,25 +153,24 @@ NWB.options = {
 			get = "getShowAllAlts",
 			set = "setShowAllAlts",
 		},
-		flashMinimized = {
+		minimapButton = {
 			type = "toggle",
-			name = "Flash Minimized",
-			desc = "Flash the wow client when you have it minimized and a buff is about to drop? Flashes when  minute left on timer "
-					.. "and when a head is handed in a few seconds before buff drops.",
-			order = 17,
-			get = "getFlashMinimized",
-			set = "setFlashMinimized",
+			name = "Show Minimap Button",
+			desc = "Show the NWB button the minimap?",
+			order = 20,
+			get = "getMinimapButton",
+			set = "setMinimapButton",
 		},
 		logonHeader = {
 			type = "header",
 			name = "Logon Messages",
-			order = 20,
+			order = 23,
 		},
 		logonPrint = {
 			type = "toggle",
 			name = "Logon Timers",
 			desc = "Show timers in the chat window when you log on, you can disable all logon msgs with this setting.",
-			order = 21,
+			order = 24,
 			get = "getLogonPrint",
 			set = "setLogonPrint",
 		},
@@ -179,7 +178,7 @@ NWB.options = {
 			type = "toggle",
 			name = "Rend",
 			desc = "Show Rend timer in the chat window when you log on.",
-			order = 22,
+			order = 25,
 			get = "getLogonRend",
 			set = "setLogonRend",
 		},
@@ -187,7 +186,7 @@ NWB.options = {
 			type = "toggle",
 			name = "Onyxia",
 			desc = "Show Onyxia timer in the chat window when you log on.",
-			order = 23,
+			order = 26,
 			get = "getLogonOny",
 			set = "setLogonOny",
 		},
@@ -195,7 +194,7 @@ NWB.options = {
 			type = "toggle",
 			name = "Nefarian",
 			desc = "Show Nefarian timer in the chat window when you log on.",
-			order = 24,
+			order = 27,
 			get = "getLogonNef",
 			set = "setLogonNef",
 		},
@@ -203,7 +202,7 @@ NWB.options = {
 			type = "toggle",
 			name = "DMF Spawn",
 			desc = "Show Darkmoon Faire spawn time, this will only show when there is less than 6 hours left until spawn or despawn.",
-			order = 25,
+			order = 28,
 			get = "getLogonDmfSpawn",
 			set = "setLogonDmfSpawn",
 		},
@@ -211,7 +210,7 @@ NWB.options = {
 			type = "toggle",
 			name = "DMF Buff Coooldown",
 			desc = "Show Darkmoon Faire buff 5 hour cooldown, this will only show when you have an ative cooldown and when DMF is up.",
-			order = 26,
+			order = 29,
 			get = "getLogonDmfBuffCooldown",
 			set = "setLogonDmfBuffCooldown",
 		},
@@ -338,12 +337,28 @@ NWB.options = {
 			get = "getMiddleBuffWarning",
 			set = "setMiddleBuffWarning",
 		},
+		middleHideCombat = {
+			type = "toggle",
+			name = "Hide In Combat",
+			desc = "Hide middle of the screen warnings in combat?",
+			order = 48,
+			get = "getMiddleHideCombat",
+			set = "settMiddleHideCombat",
+		},
+		middleHideRaid = {
+			type = "toggle",
+			name = "Hide In Raid",
+			desc = "Hide middle of the screen warnings in raid instances? (Doesn't hide in normal dungeons)",
+			order = 49,
+			get = "getMiddleHideRaid",
+			set = "settMiddleHideRaid",
+		},
 		guildWarningHeader = {
 			type = "header",
 			name = "Guild Message Timer Warnings",
 			order = 50,
 		},
-		guild30 = {
+		--[[guild30 = {
 			type = "toggle",
 			name = "30 Minutes",
 			desc = "Send a message to guild chat when 30 minutes left.",
@@ -358,7 +373,7 @@ NWB.options = {
 			order = 52,
 			get = "getGuild15",
 			set = "setGuild15",
-		},
+		},]]
 		guild10 = {
 			type = "toggle",
 			name = "10 Minutes",
@@ -367,14 +382,14 @@ NWB.options = {
 			get = "getGuild10",
 			set = "setGuild10",
 		},
-		guild5 = {
+		--[[guild5 = {
 			type = "toggle",
 			name = "5 Minutes",
 			desc = "Send a message to guild chat when 5 minutes left.",
 			order = 54,
 			get = "getGuild5",
 			set = "setGuild5",
-		},
+		},]]
 		guild1 = {
 			type = "toggle",
 			name = "1 Minute",
@@ -383,14 +398,14 @@ NWB.options = {
 			get = "getGuild1",
 			set = "setGuild1",
 		},
-		guildReset = {
+		--[[guildReset = {
 			type = "toggle",
 			name = "Buff Has Reset",
 			desc = "Send a message to guild chat when a buff has reset and a new one can be dropped.",
 			order = 56,
 			get = "getGuild0",
 			set = "setGuild0",
-		},
+		},]]
 		guildNpcDialogue = {
 			type = "toggle",
 			name = "NPC Dialogue Started",
@@ -512,28 +527,50 @@ NWB.options = {
 			type = "toggle",
 			name = "Dragon Minimap",
 			desc = "Show Night Dragon's Breath icons on the mini map?.",
-			order = 71
+			order = 80
 			,
 			get = "getShowDragonMinimapMarkers",
 			set = "setShowDragonMinimapMarkers",
 		},
+		showExpiredTimers = {
+			type = "toggle",
+			name = "Show Expired Timers",
+			desc = "Show expired timers in Felwood? They will be shown in red text how long ago a timer expired, the default "
+					.. "time is 5 minutes (people say songflowers stay cleansed for 5 minutes after spawn?).",
+			order = 81,
+			get = "getShowExpiredTimers",
+			set = "setShowExpiredTimers",
+		},
+		expiredTimersDuration = {
+			type = "range",
+			name = "Expired Timers Duraton",
+			desc = "How long should Felwood timers show for after expiring on the world map?",
+			order = 82,
+			get = "getExpiredTimersDuration",
+			set = "setExpiredTimersDuration",
+			min = 1,
+			max = 60,
+			softMin = 1,
+			softMax = 60,
+			step = 1,
+		},
 		dmf = {
 			type = "header",
 			name = "Darkmoon Faire",
-			order = 80,
+			order = 90,
 		},
 		dmfDesc = {
 			type = "description",
 			name = "|CffDEDE42Your DMF damage buff cooldown will also show on the Darkmoon Faire map icon when you hover it, if you"
 					.. " have a cooldown and DMF is currently up.",
 			fontSize = "medium",
-			order = 81,
+			order = 91,
 		},
 		showDmfWb = {
 			type = "toggle",
 			name = "Show DMF with /wb",
 			desc = "Show DMF spawn timer together with /wb command?",
-			order = 82,
+			order = 92,
 			get = "getShowDmfWb",
 			set = "setShowDmfWb",
 		},
@@ -541,7 +578,7 @@ NWB.options = {
 			type = "toggle",
 			name = "DMF Spawn with /wb",
 			desc = "Show DMF spawn timer together with /wb command?",
-			order = 82,
+			order = 92,
 			get = "getShowDmfWb",
 			set = "setShowDmfWb",
 		},
@@ -550,7 +587,7 @@ NWB.options = {
 			name = "DMF Buff Cooldown /wb",
 			desc = "Show your DMF buff cooldown timer together with /wb command? Only shows when you are on an active cooldown"
 					.. " and DMF is currently up.",
-			order = 83,
+			order = 93,
 			get = "getShowDmfBuffWb",
 			set = "setShowDmfBuffWb",
 		},
@@ -558,7 +595,7 @@ NWB.options = {
 			type = "toggle",
 			name = "Show Close To Spawn",
 			desc = "Show DMF spawn timer at logon and together with /wb command when it's within 12 hours of spawn or despawn.",
-			order = 83,
+			order = 93,
 			get = "getShowDmfWhenClose",
 			set = "setShowDmfWhenClose",
 		},]]
@@ -566,7 +603,7 @@ NWB.options = {
 			type = "toggle",
 			name = "Show Always Logon",
 			desc = "Show DMF spawn timer at logon always, even if it's not close to spawn.",
-			order = 84,
+			order = 94,
 			get = "getShowDmfLogon",
 			set = "setShowDmfLogon",
 		},]]
@@ -575,27 +612,27 @@ NWB.options = {
 			name = "Show Map Marker",
 			desc = "Show DMF map marker with spawn timer and buff cooldown info in Mulgore and Elwynn Forest "
 					.. "world maps (whichever is next spawn). You can also type /dmf map to open the world map strait to this marker.",
-			order = 85,
+			order = 95,
 			get = "getShowDmfMap",
 			set = "setShowDmfMap",
 		},
 		guildChatFilter = {
 			type = "header",
 			name = "Guild Chat Filter",
-			order = 90,
+			order = 100,
 		},
 		guildChatFilterDesc = {
 			type = "description",
 			name = "|CffDEDE42This will block any guild msgs from this addon you choose so you don't see them. It will stop "
 					.. "you from seeing your own msgs and msgs from other addon users in guild chat.",
 			fontSize = "medium",
-			order = 91,
+			order = 101,
 		},
 		filterYells = {
 			type = "toggle",
 			name = "Filter Buff Warning",
 			desc = "Filter the msg when a buff is about to drop in a few seconds (Onyxia will drop in 14 seconds).",
-			order = 92,
+			order = 102,
 			get = "getFilterYells",
 			set = "setFilterYells",
 		},
@@ -603,7 +640,7 @@ NWB.options = {
 			type = "toggle",
 			name = "Filter Buff Dropped",
 			desc = "Filter the msg when a buff has dropped (Rallying Cry of the Dragonslayer (Onyxia) has dropped).",
-			order = 93,
+			order = 103,
 			get = "getFilterDrops",
 			set = "setFilterDrops",
 		},
@@ -611,7 +648,7 @@ NWB.options = {
 			type = "toggle",
 			name = "Filter Timer Msgs",
 			desc = "Filter timer msgs (Onyxia resets in 1 minute).",
-			order = 94,
+			order = 104,
 			get = "getFilterTimers",
 			set = "setFilterTimers",
 		},
@@ -619,7 +656,7 @@ NWB.options = {
 			type = "toggle",
 			name = "Filter !wb command",
 			desc = "Filter the !wb and !dmf in guild chat when typed by players.",
-			order = 95,
+			order = 105,
 			get = "getFilterCommand",
 			set = "setFilterCommand",
 		},
@@ -627,7 +664,7 @@ NWB.options = {
 			type = "toggle",
 			name = "Filter !wb reply",
 			desc = "Filter the reply msg with timers this addon does when !wb or !!dmf is used.",
-			order = 96,
+			order = 106,
 			get = "getFilterCommandResponse",
 			set = "setFilterCommandResponse",
 		},
@@ -635,7 +672,7 @@ NWB.options = {
 			type = "toggle",
 			name = "Filter Songflowers",
 			desc = "Filter the msg when a songflower is picked.",
-			order = 97,
+			order = 107,
 			get = "getFilterSongflowers",
 			set = "setFilterSongflowers",
 		},
@@ -643,7 +680,7 @@ NWB.options = {
 			type = "toggle",
 			name = "Filter NPC Killed",
 			desc = "Filter the msg when a buff hand in NPC is killed in your city.",
-			order = 98,
+			order = 108,
 			get = "getFilterNpcKilled",
 			set = "setFilterNpcKilled",
 		},
@@ -757,6 +794,35 @@ NWB.options = {
 			get = "getSoundsZanDrop",
 			set = "setSoundsZanDrop",
 		},
+		flash = {
+			type = "header",
+			name = "Flash When Minimized",
+			order = 130,
+		},
+		flashOneMin = {
+			type = "toggle",
+			name = "Flash One Minute",
+			desc = "Flash the wow client when you have it minimized and 1 minute is left on timer?",
+			order = 131,
+			get = "getFlashOneMin",
+			set = "setFlashOneMin",
+		},
+		flashFirstYell = {
+			type = "toggle",
+			name = "Flash NPC Yell",
+			desc = "Flash the wow client when you have it minimized and the NPC's out a few seconds before buff drops?",
+			order = 132,
+			get = "getFlashFirstYell",
+			set = "setFlashFirstYell",
+		},
+		flashFirstYellZan = {
+			type = "toggle",
+			name = "Flash Zandalar",
+			desc = "Flash the wow client when you have it minimized and the Zandalar buff is about to go out?",
+			order = 133,
+			get = "getFlashFirstYellZan",
+			set = "setFlashFirstYellZan",
+		},
 	},
 };
 
@@ -815,6 +881,8 @@ NWB.optionDefaults = {
 		middle1 = true,
 		middle0 = true,
 		middleBuffWarning = true,
+		middleHideCombat = false,
+		middleHideRaid = false,
 		guild30 = false,
 		guild15 = false,
 		guild10 = true,
@@ -881,7 +949,6 @@ NWB.optionDefaults = {
 		logonDmfBuffCooldown = true,
 		showDmfBuffWb = true,
 		showAllAlts = false,
-		flashMinimized = true,
 		filterYells = false,
 		filterDrops = false,
 		filterTimers = false,
@@ -901,7 +968,13 @@ NWB.optionDefaults = {
 		soundsOnyDrop = "NWB - Zelda",
 		soundsNefDrop = "NWB - Zelda",
 		soundsZanDrop = "NWB - Zelda",
-		
+		showExpiredTimers = true,
+		expiredTimersDuration = 5,
+		minimapIcon = {["minimapPos"] = 165, ["hide"] = false},
+		minimapButton = true,
+		flashOneMin = true,
+		flashFirstYell = true,
+		flashFirstYellZan = true,
 		resetLayers3 = true, --Reset layers one time (sometimes needed when upgrading from old version.
 		resetSongflowers = true, --Reset songflowers one time.
 		experimental = true, --Enable features being tested on occasion.
@@ -1123,13 +1196,56 @@ function NWB:getShowAllAlts(info)
 	return self.db.global.showAllAlts;
 end
 
---Show all alts in the buffs window.
+--Flash minimized.
 function NWB:setFlashMinimized(info, value)
 	self.db.global.flashMinimized = value;
 end
 
 function NWB:getFlashMinimized(info)
 	return self.db.global.flashMinimized;
+end
+
+--Flash minimized.
+function NWB:setFlashOneMin(info, value)
+	self.db.global.flashOneMin = value;
+end
+
+function NWB:getFlashOneMin(info)
+	return self.db.global.flashOneMin;
+end
+
+--Flash minimized.
+function NWB:setFlashFirstYell(info, value)
+	self.db.global.flashFirstYell = value;
+end
+
+function NWB:getFlashFirstYell(info)
+	return self.db.global.flashFirstYell;
+end
+
+--Flash minimized.
+function NWB:setFlashFirstYellZan(info, value)
+	self.db.global.flashFirstYellZan = value;
+end
+
+function NWB:getFlashFirstYellZan(info)
+	return self.db.global.flashFirstYellZan;
+end
+
+--Minimap button
+function NWB:setMinimapButton(info, value)
+	self.db.global.minimapButton = value;
+	if (value) then
+		NWB.LDBIcon:Show("NovaWorldBuffs");
+		self.db.global.minimapIcon.hide = false;
+	else
+		NWB.LDBIcon:Hide("NovaWorldBuffs");
+		self.db.global.minimapIcon.hide = true;
+	end
+end
+
+function NWB:getMinimapButton(info)
+	return self.db.global.minimapButton;
 end
 
 --Chat 30 minute warning.
@@ -1256,6 +1372,24 @@ end
 
 function NWB:getMiddleBuffWarning(info)
 	return self.db.global.middleBuffWarning;
+end
+
+--Middle of the screen hide in combat.
+function NWB:setMiddleHideCombat(info, value)
+	self.db.global.middleHideCombat = value;
+end
+
+function NWB:getMiddleHideCombat(info)
+	return self.db.global.middleHideCombat;
+end
+
+--Middle of the screen hide in raid.
+function NWB:setMiddleHideRaid(info, value)
+	self.db.global.middleHideRaid = value;
+end
+
+function NWB:getMiddleHideRaid(info)
+	return self.db.global.middleHideRaid;
 end
 
 --Guild 30 minute warning.
@@ -1456,6 +1590,24 @@ end
 
 function NWB:getShowDragonMinimapMarkers(info)
 	return self.db.global.showDragonMinimapMarkers;
+end
+
+--Show expired timers.
+function NWB:setShowExpiredTimers(info, value)
+	self.db.global.showExpiredTimers = value;
+end
+
+function NWB:getShowExpiredTimers(info)
+	return self.db.global.showExpiredTimers;
+end
+
+--Expired timers duration.
+function NWB:setExpiredTimersDuration(info, value)
+	self.db.global.expiredTimersDuration = value;
+end
+
+function NWB:getExpiredTimersDuration(info)
+	return self.db.global.expiredTimersDuration;
 end
 
 --Show DMF at logon always.

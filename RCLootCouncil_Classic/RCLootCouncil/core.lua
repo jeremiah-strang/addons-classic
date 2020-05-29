@@ -92,7 +92,7 @@ local playersData = {-- Update on login/encounter starts. it stores the informat
 
 function RCLootCouncil:OnInitialize()
 	--IDEA Consider if we want everything on self, or just whatever modules could need.
-	self.version = "2.19.0"
+	self.version = "2.19.1"
 	self.nnp = false
 	self.debug = false
 	self.tVersion = nil -- String or nil. Indicates test version, which alters stuff like version check. Is appended to 'version', i.e. "version-tVersion" (max 10 letters for stupid security)
@@ -235,7 +235,8 @@ function RCLootCouncil:OnEnable()
 	self.optionsFrame = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("RCLootCouncil", "RCLootCouncil", nil, "settings")
 	self.optionsFrame.ml = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("RCLootCouncil", "Master Looter", "RCLootCouncil", "mlSettings")
 	self.playersData = playersData -- Make it globally available
-	self:InitItemStorage()
+
+	self:ScheduleTimer("InitItemStorage", 5, self) -- Delay to have a better change of getting correct item info
 
 	-- register events
 	for event, method in pairs(self.coreEvents) do
@@ -1965,8 +1966,8 @@ function RCLootCouncil:OnEvent(event, ...)
 	end
 end
 
-function RCLootCouncil:OnBonusRoll (_, type, link)
-	self:DebugLog("BONUS_ROLL", type, link)
+function RCLootCouncil:OnBonusRoll (_, type, link, ...)
+	self:DebugLog("BONUS_ROLL", type, link, ...)
 	if type == "item" or type == "artifact_power" then
 		-- Only handle items and artifact power
 		self:SendCommand("group", "bonus_roll", self.playerName, type, link)
@@ -1986,7 +1987,7 @@ function RCLootCouncil:NewMLCheck()
 	self.lootMethod = GetLootMethod()
 	local instance_type = select(2, IsInInstance())
 	if instance_type == "pvp" or instance_type == "arena" then return end -- Don't do anything here
-	if self.masterLooter and self.masterLooter ~= "" and (self.masterLooter == "Unknown" or self.masterLooter:lower() == _G.UNKNOWNOBJECT:lower()) then
+	if self.masterLooter and self.masterLooter ~= "" and (self.masterLooter == "Unknown" or Ambiguate(self.masterLooter, "short"):lower() == _G.UNKNOWNOBJECT:lower()) then
 		-- ML might be unknown for some reason
 		self:Debug("Unknown ML")
 		return self:ScheduleTimer("NewMLCheck", 0.5)

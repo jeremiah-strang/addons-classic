@@ -1,3 +1,26 @@
+# v0.9.3
+## Bugfixes
+*Fixed issues on 'LootOpened' introduced in the last version (Curse#64,Curse#65,Curse#66).*
+
+# v0.9.2
+## Bugfixes
+*Fixed desync issue when ML reloaded in groups (#21, Curse#61, Curse#62).*
+*Fixed issue with occasional "Unknown" Master Looter (Curse#60).*
+*Detecting 'Award Later' items after a /reload should be more reliable.*
+
+# v0.9.1
+## Updated RCLootCouncil to v2.19.1
+### Changes
+#### History Deletion
+Prefer using id time stamp when deleting history entries by date (CurseClassic#57).
+Should be more precise until a planend overhaul of the time keeping is implemented.
+
+### Bugfixes
+*Fixed issue with the disenchant button introduced in v2.19.0.*
+
+## Bugfixes
+*Fixed issue with occasional uncached loot.*
+
 # v0.9.0
 ## Updated RCLootCouncil to v2.19.0
 *Only Classic relevant changes listed here-*

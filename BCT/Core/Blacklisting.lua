@@ -9,6 +9,8 @@ local function RemoveBlacklistedBuffs()
 			local found, blacklisted = BCT.GetAura(name)
 			if name and found and blacklisted then
 				CancelUnitBuff("player", i)
+				openSlots = 32 - (BCT.buffsTotal + BCT.enchantsTotal + BCT.hiddenTotal)
+				if openSlots > tonumber(BCT.session.db.blacklisting.buffer) then break end
 			end
 		end
 	end
@@ -29,8 +31,10 @@ local function SetInCombatBlacklistingMacro()
 			local names = {}
 
 			for k,v in pairs(BCT.session.db.auras["auras_visible"]) do
-				local name = GetSpellInfo(k)
-				if v[5] then table.insert(names,name) end
+				if v[6] ~= BCT.CONSUMABLE then
+					local name = GetSpellInfo(k)
+					if v[5] then table.insert(names,name) end
+				end
 			end
 			
 			local macros = {}

@@ -79,7 +79,7 @@ L["onyxiaNpcKilledHordeWithTimer"] = "Onyxia NPC (Runthak) wurde vor %s getötet
 L["NefarianNpcKilledHordeWithTimer"] = "Nefarian NPC (Saurfang) wurde vor %s getötet. Ein neuer Buff wurde bisher nicht festgestellt.";
 L["onyxiaNpcKilledAllianceWithTimer"] = "Onyxia NPC (Mattingly) wurde vor %s getötet. Ein neuer Buff wurde bisher nicht festgestellt.";
 L["NefarianNpcKilledAllianceWithTimer"] = "Nefarian NPC (Afrasiabi) wurde vor %s getötet. Ein neuer Buff wurde bisher nicht festgestellt.";
-L["anyNpcKilledAllianceWithTimer"] = "NPC wurde vor %s getötet"; --Map timers tooltip msg.
+L["anyNpcKilledWithTimer"] = "NPC wurde vor %s getötet"; --Map timers tooltip msg.
 
 ---==============---
 ---Darkmoon Faire---
@@ -115,7 +115,7 @@ L["dmf"] = "Dunkelmond-Jahrmarkt"; --Darkmoon Faire
 L["noTimer"] = "--"; --No timer (used only in map timer frames)
 L["noCurrentTimer"] = "Kein aktueller Timer"; --No current timer
 L["noActiveTimers"] = "Kein aktiver Timer";	--No active timers
-L["newBuffCanBeDropped"] = "Ein neuer %s Buff kann jetzt gestellt werden"
+L["newBuffCanBeDropped"] = "Ein neuer %s Buff kann jetzt gestellt werden";
 L["buffResetsIn"] = "%s wird zurückgesetzt in %s";
 L["rendFirstYellMsg"] = "Rend Buff in 6 Sekunden";
 L["onyxiaFirstYellMsg"] = "Onyxia Buff in 14 Sekunden.";

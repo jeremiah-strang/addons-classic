@@ -12,6 +12,14 @@ local buffTypeArr = {
 	[BCT.HOLIDAY] = "auras_visible",
 }
 
+local function GetSpacer(n)
+	return {
+		order = n,
+		type = "description",
+		name = "",
+	}
+end
+	
 local GetAuraSelect = {
 	type = "select",
 	order = 2,
@@ -105,7 +113,7 @@ local GetDisplayName = {
 local GetTracked = {
 	order = 6,
 	type = "toggle",
-	name = "Display",
+	name = "Track",
 	desc = "...",
 	width = "normal",
 	get = function(info) return BCT.session.db.auras[buffTypeArr[BCT.session.state.aurasTypeSelected]][BCT.session.state.aurasSelected[BCT.session.state.aurasTypeSelected]][3] end,
@@ -165,7 +173,6 @@ local consGroupArgs = {
 	listName = GetListName,
 	displayName = GetDisplayName,
 	tracked = GetTracked,
-	blacklisted = GetBlacklisted,
 	removeSpell = GetRemoveSpell,
 }
 
@@ -178,11 +185,21 @@ local buffGroupArgs = {
 	removeSpell = GetRemoveSpell,
 }
 
+local holidayGroupArgs = {
+	auraSelect = GetAuraSelect,
+	auraAdd = GetAuraAdd,
+	displayName = GetDisplayName,
+	tracked = GetTracked,
+	space = GetSpacer(7),
+	removeSpell = GetRemoveSpell,
+}
+
 local debuffGroupArgs = {
 	auraSelect = GetAuraSelect,
 	auraAdd = GetAuraAdd,
 	displayName = GetDisplayName,
 	tracked = GetTracked,
+	space = GetSpacer(7),
 	removeSpell = GetRemoveSpell,
 }
 
@@ -206,7 +223,7 @@ local groups = {
 	[BCT.GOODDEBUFF] = debuffGroupArgs,
 	[BCT.ENCHANT] = enchantGroupArgs,
 	[BCT.SPECIAL] = hiddenGroupArgs,
-	[BCT.HOLIDAY] = buffGroupArgs,
+	[BCT.HOLIDAY] = holidayGroupArgs,
 }
 
 local function GetOptionsTable()
@@ -236,164 +253,286 @@ local function GetOptionsTable()
 				get = function(info) end,
 				set = function(info, value) end,
 				args = {
-					show = {
-						order = 0,
-						type = "toggle",
-						name = "Enable",
+					lock = {
+						order = 2,
+						type = "execute",
+						name = function()
+							if BCT.session.db.window.lock then
+								return "Toggle Anchor"
+							else
+								return "Hide Anchor"
+							end
+						end,
 						desc = "...",
 						width = "normal",
-						get = function(info) return BCT.session.db.window.show end,
-						set = function(info, value) 
-							BCT.session.db.window.show = not BCT.session.db.window.show
+						func = function()
+							BCT.session.db.window.lock = not BCT.session.db.window.lock
 						end,
 					},
-					window = {
-						order = 1,
-						type = "group",
-						name = "Frame",
-						args = {
-							locked = {
-								order = 2,
-								type = "toggle",
-								name = "Toggle Anchor",
-								desc = "...",
-								width = "full",
-								get = function(info) return not BCT.session.db.window.lock end,
-								set = function(info, value) 
-									BCT.session.db.window.lock = not BCT.session.db.window.lock
-								end,
-							},
-							reset = {
-								name = "Reset Position",
-								desc = "Resets Window Position",
-								type = 'execute',
-								order = 3,					
-								width = "normal",					
-								func = function()
-									BCT.Anchor:SetUserPlaced(false)
-									BCT.Anchor:SetPoint("CENTER", WorldFrame, "CENTER", 0,0)
-									C_UI.Reload()
-								end,
-								confirmText = "Resets Window Position (Reloads UI)",
-								confirm = true
-							},
-						},
+					reset = {
+						name = "Reposition Window",
+						desc = "Resets Window Position",
+						type = 'execute',
+						order = 1,					
+						width = "normal",					
+						func = function()
+							BCT.Anchor:SetUserPlaced(false)
+							BCT.Anchor:SetPoint("CENTER", WorldFrame, "CENTER", 0,0)
+							C_UI.Reload()
+						end,
+						confirmText = "Resets Window Position (Reloads UI)",
+						confirm = true
+					},
+					enable = {
+						name = function()
+							if BCT.session.db.window.enable then
+								return "Disable"
+							else
+								return "Enable"
+							end
+						end,
+						desc = "",
+						type = 'execute',
+						order = 3,	
+						width = "normal",					
+						func = function()
+							BCT.session.db.window.enable = not BCT.session.db.window.enable
+						end,
 					},
 					txt = {
-						order = 2,
+						order = 4,
 						type = "group",
-						name = "Text",
+						name = "General",
 						args = {
-							enchants = {
-								name = "Enchants",
-								desc = "",
-								type = 'toggle',
-								order = 1,					
-								width = "normal",			
-								get = function(info) return BCT.session.db.window.enchants end,
-								set = function(info, value) 
-									BCT.session.db.window.enchants = not BCT.session.db.window.enchants
-								end,
-							},
-							nextfive = {
-								name = "5 Next",
-								desc = "",
-								type = 'toggle',
-								order = 2,					
-								width = "normal",			
-								get = function(info) return BCT.session.db.window.nextfive end,
-								set = function(info, value) 
-									BCT.session.db.window.nextfive = not BCT.session.db.window.nextfive
-								end,
-							},
-							profileTxt = {
-								name = "Profile",
-								desc = "",
-								type = 'toggle',
-								order = 3,					
-								width = "normal",			
-								get = function(info) return BCT.session.db.window.profileTxt end,
-								set = function(info, value) 
-									BCT.session.db.window.profileTxt = not BCT.session.db.window.profileTxt
-								end,
-							},
-							title = {
+							titleGroup = {
 								name = "Title",
 								desc = "",
-								type = 'toggle',
-								order = 4,					
-								width = "normal",			
-								get = function(info) return BCT.session.db.window.title end,
-								set = function(info, value) 
-									BCT.session.db.window.title = not BCT.session.db.window.title
-								end,
-							},
-							grouplines = {
-								name = "Group Tracking",
-								desc = "",
-								type = 'toggle',
-								order = 5,					
-								width = "double",			
-								get = function(info) return BCT.session.db.window.group_lines end,
-								set = function(info, value) 
-									BCT.session.db.window.group_lines = not BCT.session.db.window.group_lines
-								end,
-							},
-							fontSize = {
-								order = 6,
-								name = "Font Size",
-								desc = "",
-								type = "range",
-								min = 4, max = 32, step = 1,
-								get = function(info) return tonumber(BCT.session.db.window.font_size) end,
-								set = function(info, value) 
-									local inp = tonumber(value)
-									if 'number' == type(inp) and inp > 0 then
-										BCT.session.db.window.font_size = inp
-										BCT.UpdateFont()
-									else
-										print("BCT: You must input a positive number higher than 0")
-									end
-								end,
-							},
-							font = {
-								type = "select",
-								order = 7,
-								name = "Font",
-								desc = "...",
-								values = fonts,
-								get = function()
-									for info, value in next, fonts do
-										if value == BCT.session.db.window.font then
-											return info
-										end
-									end
-								end, 
-								set = function(_, value)
-									BCT.session.db.window.font = fonts[value]
-									BCT.UpdateFont()
-								end,
-							},
-							fontStyle = {
-								type = "select",
-								order = 8,
-								name = "Font Outline",
-								values = {
-									["None"] = "None",
-									["MONOCHROMEOUTLINE"] = "MONOCHROMEOUTLINE",
-									["OUTLINE"] = "OUTLINE",
-									["THICKOUTLINE"] = "THICKOUTLINE",
+								type = 'group',
+								order = 1,					
+								guiInline = true,
+								args = {
+									Text = {
+										name = "Text",
+										type = "input",
+										order = 3,
+										desc = "...",
+										width = "normal",	
+										get = function(info) return BCT.session.db.window.anchor.value end,
+										set = function(info, value) 
+											BCT.session.db.window.anchor.value = value
+										end,
+									},	
+									counter = {
+										type = "select",
+										order = 4,
+										name = "Counter",
+										desc = "...",
+										
+										values = {
+											["None"] = "None",
+											["3/32"] = "3/32",
+											["3"] = "3",
+										},	
+										get = function(_, value) return BCT.session.db.window.anchor.counter end, 
+										set = function(_, value) 
+											BCT.session.db.window.anchor.counter = value
+										end,
+									},
+									--header = {
+									--	name = "",
+									--	type = "header",
+									--	order = 13,
+									--},	
+									fontSize = {
+										order = 1,
+										name = "Font Size",
+										desc = "",
+										type = "range",
+										min = 4, max = 32, step = 1,
+										get = function(info) return tonumber(BCT.session.db.window.anchor.font_size) end,
+										set = function(info, value) 
+											local inp = tonumber(value)
+											if 'number' == type(inp) and inp > 0 then
+												BCT.session.db.window.anchor.font_size = inp
+												BCT.UpdateFont()
+											else
+												print("BCT: You must input a positive number higher than 0")
+											end
+										end,
+									},
+									font = {
+										type = "select",
+										order = 2,
+										name = "Font",
+										desc = "...",
+										values = fonts,
+										get = function()
+											for info, value in next, fonts do
+												if value == BCT.session.db.window.anchor.font then
+													return info
+												end
+											end
+										end, 
+										set = function(_, value)
+											BCT.session.db.window.anchor.font = fonts[value]
+											BCT.UpdateFont()
+										end,
+									},
+									fontStyle = {
+										type = "select",
+										order = 3,
+										name = "Font Outline",
+										values = {
+											["None"] = "None",
+											["MONOCHROMEOUTLINE"] = "MONOCHROMEOUTLINE",
+											["OUTLINE"] = "OUTLINE",
+											["THICKOUTLINE"] = "THICKOUTLINE",
+										},
+										get = function() return BCT.session.db.window.anchor.font_style end,
+										set = function(info, value) 
+											BCT.session.db.window.anchor.font_style = value
+											BCT.UpdateFont()
+										end,
+									},
 								},
-								get = function() return BCT.session.db.window.font_style end,
-								set = function(info, value) 
-									BCT.session.db.window.font_style = value
-									BCT.UpdateFont()
+							},
+							bodyGroup = {
+								name = "Body",
+								desc = "",
+								type = 'group',
+								order = 2,					
+								guiInline = true,
+								args = {
+									fontSize = {
+										order = 1,
+										name = "Font Size",
+										desc = "",
+										type = "range",
+										min = 4, max = 32, step = 1,
+										get = function(info) return tonumber(BCT.session.db.window.body.font_size) end,
+										set = function(info, value) 
+											local inp = tonumber(value)
+											if 'number' == type(inp) and inp > 0 then
+												BCT.session.db.window.body.font_size = inp
+												BCT.UpdateFont()
+											else
+												print("BCT: You must input a positive number higher than 0")
+											end
+										end,
+									},
+									font = {
+										type = "select",
+										order = 2,
+										name = "Font",
+										desc = "...",
+										values = fonts,
+										get = function()
+											for info, value in next, fonts do
+												if value == BCT.session.db.window.body.font then
+													return info
+												end
+											end
+										end, 
+										set = function(_, value)
+											BCT.session.db.window.body.font = fonts[value]
+											BCT.UpdateFont()
+										end,
+									},
+									fontStyle = {
+										type = "select",
+										order = 3,
+										name = "Font Outline",
+										values = {
+											["None"] = "None",
+											["MONOCHROMEOUTLINE"] = "MONOCHROMEOUTLINE",
+											["OUTLINE"] = "OUTLINE",
+											["THICKOUTLINE"] = "THICKOUTLINE",
+										},
+										get = function() return BCT.session.db.window.body.font_style end,
+										set = function(info, value) 
+											BCT.session.db.window.body.font_style = value
+											BCT.UpdateFont()
+										end,
+									},
+									mouseover = {
+										name = "Mouse Over",
+										desc = "",
+										type = 'toggle',
+										order = 4,					
+										width = "normal",			
+										get = function(info) return BCT.session.db.window.body.mouseover end,
+										set = function(info, value) 
+											BCT.session.db.window.body.mouseover = not BCT.session.db.window.body.mouseover
+										end,
+									},
+									growup = {
+										name = "Grow Up",
+										desc = "",
+										type = 'toggle',
+										order = 5,					
+										width = "normal",			
+										get = function(info) return BCT.session.db.window.body.growup end,
+										set = function(info, value) 
+											BCT.session.db.window.body.growup = not BCT.session.db.window.body.growup
+										end,
+									},
+									grouplines = {
+										name = "Group Tracking",
+										desc = "",
+										type = 'toggle',
+										order = 6,					
+										width = "normal",			
+										get = function(info) return BCT.session.db.window.body.group_lines end,
+										set = function(info, value) 
+											BCT.session.db.window.body.group_lines = not BCT.session.db.window.body.group_lines
+										end,
+									},
+									xoff = {
+										order = 7,
+										name = "X Offset",
+										desc = "",
+										type = "range",
+										min = -2140, max = 2140, step = 1,
+										get = function(info) return BCT.session.db.window.body.x_offset end,
+										set = function(info, value) 
+											BCT.session.db.window.body.x_offset = tonumber(value)
+										end,
+									},
+									yoff = {
+										order = 8,
+										name = "Y Offset",
+										desc = "",
+										type = "range",
+										min = -2140, max = 2140, step = 1,
+										get = function(info) return BCT.session.db.window.body.y_offset end,
+										set = function(info, value) 
+											BCT.session.db.window.body.y_offset = tonumber(value)
+										end,
+									},
+								},
+							},
+							text = {
+								name = "Text",
+								desc = "",
+								type = 'multiselect',
+								order = 3,
+								values = {
+									["enchants"] = "Enchants",
+									["buffs"] = "Buffs",
+									["nextone"] = "Next",
+									["tracking"] = "Tracking",
+									--["nextfive"] = "Next Five",
+									["profile"] = "Profile",
+								},	
+								get = function(_, value) return BCT.session.db.window.text[value] end, 
+								set = function(_, value, state) 
+									BCT.session.db.window.text[value] = state
 								end,
 							},
 						},
 					},
 					announce = {
-						order = 3,
+						order = 5,
 						type = "group",
 						name = "Announcements",
 						args = {
@@ -473,7 +612,7 @@ local function GetOptionsTable()
 						},
 					},
 					loading = {
-						order = 4,
+						order = 6,
 						type = "group",
 						name = "Loading",
 						args = {
@@ -510,19 +649,6 @@ local function GetOptionsTable()
 									BCT.session.db.loading.instanceState[value] = state
 								end,
 							},
-							otherState = {
-								name = "Other",
-								desc = "Other",
-								type = 'multiselect',
-								order = 20,					
-								values = {
-									["Mouseover"] = "Mouseover",
-								},	
-								get = function(_, value) return BCT.session.db.loading.other[value] end, 
-								set = function(_, value, state) 
-									BCT.session.db.loading.other[value] = state
-								end,
-							},
 						},
 					},
 				},
@@ -534,13 +660,18 @@ local function GetOptionsTable()
 				desc = "Blacklisting",
 				args = {
 					outofcombat = {
-						name = "Out-of-combat",
+						name = "Passive",
 						type = "header",
 						order = 0,
 					},	
+					--introo = {
+					--	name = "Out-of-combat auto-removal will automatically remove any blacklisted buffs if enabled, and if the buffer is breached." ..
+					--		"\n\nSet the buffer to 32 if you want to disallow blacklisted buffs permanently out-of-combat.",
+					--	type = "description",
+					--	order = 1,
+					--},	
 					introo = {
-						name = "Out-of-combat auto-removal will automatically remove any blacklisted buffs if enabled, and if the buffer is breached." ..
-							"\n\nSet the buffer to 32 if you want to disallow blacklisted buffs permanently out-of-combat.",
+						name = "WHEN: The passive auto-removal works out-of-combat ONLY.\n\nHOW: When the amount of buffs plus the buffer exceeds 32, one buff at a time will be removed until the buffer is no longer breached. \n\nSet the buffer to 32 if you want to disallow blacklisted buffs permanently out-of-combat.",
 						type = "description",
 						order = 1,
 					},	
@@ -573,14 +704,19 @@ local function GetOptionsTable()
 						end,
 					},
 					incombat = {
-						name = "In-combat",
+						name = "Active",
 						type = "header",
 						order = 7,
 					},	
+					--intro = {
+					--	name = "Because of protected API in-combat auto-removal ONLY works through macro usage." ..
+					--		"\n\nPlease be aware that it is not possible to consecutively remove unwanted buffs in-combat, instead the macro will attempt to remove ALL blacklisted buffs when clicked." ..
+					--		"\n\nTo use in-combat auto-removal add the following line to one or more spell macros that you spam in combat:",
+					--	type = "description",
+					--	order = 8,
+					--},	
 					intro = {
-						name = "Because of protected API in-combat auto-removal ONLY works through macro usage." ..
-							"\n\nFurthermore it is not possible to remove unwanted buffs one by one, instead the macro will attempt to remove all blacklisted buffs when clicked." ..
-							"\n\nTo enable in-combat auto-removal add the following line to one or more spell macros that you spam in combat:",
+						name = "WHEN: The active auto-removal works both in- and out-of-combat.\n\nHOW: Before combat is entered a hidden button is created with a list on cancelaura lines. A macro which simulates a click on this button is then placed in an often used keybinding. \n\nTo use in-combat auto-removal add the following line to one or more spell macros that you spam in combat:",
 						type = "description",
 						order = 8,
 					},	
@@ -653,7 +789,7 @@ end
 
 LibStub("AceConfigRegistry-3.0"):RegisterOptionsTable("BCT", GetOptionsTable)
 BCT.optionsFrames.BCT = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("BCT", "BCT", nil, "General")
-BCT.optionsFrames.Setup = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("BCT", "General", "BCT", "Setup")
+BCT.optionsFrames.Setup = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("BCT", "Setup", "BCT", "Setup")
 BCT.optionsFrames.Blacklisting = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("BCT", "Blacklisting", "BCT", "Blacklisting")
 BCT.optionsFrames.Auras = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("BCT", "Auras", "BCT", "Auras")
 BCT.optionsFrames.Profiles = LibStub("AceConfigDialog-3.0"):AddToBlizOptions("BCT", "Profiles", "BCT", "Profiles")

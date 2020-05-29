@@ -79,7 +79,7 @@ L["onyxiaNpcKilledHordeWithTimer"] = "奥妮克希亚 NPC (伦萨克) 已经被�
 L["NefarianNpcKilledHordeWithTimer"] = "奈法利安 NPC (萨鲁法尔大王)已经被击杀了 %s ， 之后没有任何buff记录。";
 L["onyxiaNpcKilledAllianceWithTimer"] = "奥妮克希亚 buff NPC (玛丁雷少校) 已经被击杀了 %s ， 之后没有任何buff记录。";
 L["NefarianNpcKilledAllianceWithTimer"] = "奈法利安 buff NPC (艾法希比元帅)已经被击杀了 %s ， 之后没有任何buff记录。";
-L["anyNpcKilledAllianceWithTimer"] = "NPC 在 %s 以前被击杀了"; --Map timers tooltip msg.
+L["anyNpcKilledWithTimer"] = "NPC 在 %s 以前被击杀了"; --Map timers tooltip msg.
 
 
 ---==============---
@@ -115,7 +115,7 @@ L["dmf"] = "暗月马戏团"; --Darkmoon Faire
 L["noTimer"] = "没有计时"; --No timer
 L["noCurrentTimer"] = "没有当前计时"; --No current timer
 L["noActiveTimers"] = "没有激活计时";	--No active timers
-L["newBuffCanBeDropped"] = "一个新的 %s buff 现在可以取得"
+L["newBuffCanBeDropped"] = "一个新的 %s buff 现在可以取得";
 L["buffResetsIn"] = "%s 重置于 %s后.";
 L["rendFirstYellMsg"] = "雷德·黑手Buff将在 6 秒后释放。";
 L["onyxiaFirstYellMsg"] = "奥妮克希亚Buff将在 14 秒后释放。";
