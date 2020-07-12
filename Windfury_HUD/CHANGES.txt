@@ -1,0 +1,10 @@
+lightweight tag 41856f4a1a58f5a77151bdbacfd7356211c09609 1.3b
+Author:	Roark <liammorrisdev@gmail.com>
+Date:	Mon Apr 20 14:48:43 2020 -0700
+
+commit 41856f4a1a58f5a77151bdbacfd7356211c09609
+Author: Roark <liammorrisdev@gmail.com>
+Date:   Mon Apr 20 14:48:43 2020 -0700
+
+    Fixed issue where options that defaulted to true would always be true on startup/reload.
+

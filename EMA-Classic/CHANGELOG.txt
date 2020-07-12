@@ -2,6 +2,43 @@
 ChangeLogs:
 ---------------------------
 
+EMA Version: v1.13.4-Release-v0.9(121029)
+Game Version: 1.13.4
+Release Date: 03/07/2020
+
+## Communications
+	- WHISPER Communications should now work if your in a party or a raid.
+		-So you do not have to be in a guild or though i would still advise if you can.
+
+---------------------------
+
+EMA Version: v1.13.4-Release-v0.9(121027)
+Game Version: 1.13.4
+Release Date: 30/06/2020
+
+
+Updated ace3 
+
+## Communications
+	
+	-- Removed Party and Raid  Communication channels:
+		 - Dev note BIG CHANGE PLEASE READ:
+			- due to unforeseen circumstances on the classic build of WoW the party and raid channels have some 
+			* kinda a lock on them to stop them  getting all the data though i have unable to find a fix for this Issue
+			* for now i would advise you to use the Guild Communications under opations > Communications tick the use guild Communications
+
+---------------------------
+
+EMA Version: v1.13.4-Release-v0.7(121026)
+Game Version: 1.13.4
+Release Date: 30/05/2020
+
+## Toon
+	- Updated Summon API - Issue#44
+	- Durability Warning will not warn ( "(ind)%" ) Issue#45 
+	
+---------------------------
+
 EMA Version: v1.13.2-Release-v0.6(121025)
 Game Version: 1.13.4
 Release Date: 27/03/2020

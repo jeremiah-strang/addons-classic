@@ -1,11 +1,17 @@
 # Prat 3.0
 
-## [3.7.81](https://github.com/sylvanaar/prat-3-0/tree/3.7.81) (2020-05-27)
-[Full Changelog](https://github.com/sylvanaar/prat-3-0/compare/3.7.80...3.7.81)
+## [3.8.26](https://github.com/sylvanaar/prat-3-0/tree/3.8.26) (2020-07-08)
+[Full Changelog](https://github.com/sylvanaar/prat-3-0/compare/3.8.25...3.8.26) 
 
-- Scrollback: Fixes for enabling history on all frames  
-- History: Fix the index into the command history when opening an editbox  
-- History: Better solutiuon to spaves in saved command history  
-- Debug: Allow PrintLiteral to be routed to another frame  
-- History: Avoid saving into the edit history with an empty chatType attribute (Fix #61)  
-- Scrollback: The length of time to keep the message history is now an option  
+- Memory: Fix spelling error  
+- Memory: Smarter channel leaving behavior - only leave channels that are incorrect.  Prevents most instances of #114  
+- Core: Better implementation of IsrRetail  
+- Core: Trim whitespaces from all chat messages  
+- Filtering: Change AI filtering from blacklist to whitelist. Improve feedback messges  
+- Filtering: Improve the training UI a bilt by re-scoring the line after clicking the ++  or -- links  
+- Filtering: Do not allow the API to filter our the player's own messages  
+- Scrollback: Handle nil battletag case #107  
+- Customfilters: Remove tristate options- too confusing  
+- Customfilters: Another implementation of the option to apply a filter to specific channels #101  
+- Revert "Revert "CustomFilters: Support filtering by channel #101""  
+- Filtering: Support for ignoring certain chat types from AI filtering  

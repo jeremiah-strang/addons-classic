@@ -14,7 +14,7 @@ L:SetTimerLocalization({
 	TimerFlag		= "Flag respawn",
 	TimerInvite		= "%s",
 	TimerRemaining	= "Time Remaining: ",
-	TimerShadow		= "Shadow Sight",
+	TimerShadow		= "Shadow Sight"
 })
 
 L:SetOptionLocalization({
@@ -124,15 +124,18 @@ L:SetMiscLocalization({
 L = DBM:GetModLocalization("z727")
 
 L:SetTimerLocalization({
-	TimerCart	= "Cart respawn"
+	TimerRespawn	= "Cart respawn"
 })
 
 L:SetOptionLocalization({
-	TimerCart	= "Show cart respawn timer"
+	TimerResapwn	= "Show cart respawn timer",
+	TimerCart		= "Show cart cap timer"
 })
 
 L:SetMiscLocalization({
-	Capture	= "has captured"
+	Capture	= "has captured",
+	Arrived	= "has arived",
+	Begun	= "has begun"
 })
 
 -------------------------
@@ -141,7 +144,7 @@ L:SetMiscLocalization({
 L = DBM:GetModLocalization("z998")
 
 L:SetOptionLocalization({
-	ShowOrbCarriers	= "Show flag carrier",
+	ShowOrbCarriers	= "Show flag carrier"
 })
 
 L:SetMiscLocalization({

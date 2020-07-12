@@ -1,5 +1,9 @@
 local L = DBM_GUI_L
 
+local pairs, next, type, ipairs, setmetatable, mmax = pairs, next, type, ipairs, setmetatable, math.max
+local CreateFrame, GameFontNormalSmall = CreateFrame, GameFontNormalSmall
+local DBM = DBM
+
 local defaultFont, defaultFontSize = GameFontHighlightSmall:GetFont()
 
 local hack = OptionsList_OnLoad
@@ -9,7 +13,7 @@ function OptionsList_OnLoad(self, ...)
 	end
 end
 
-local tabFrame1 = CreateFrame("Frame", "DBM_GUI_DropDown", DBM_GUI_OptionsFrame, "OptionsFrameListTemplate")
+local tabFrame1 = CreateFrame("Frame", "DBM_GUI_DropDown", _G["DBM_GUI_OptionsFrame"], "OptionsFrameListTemplate")
 tabFrame1:Hide()
 tabFrame1:SetFrameStrata("TOOLTIP")
 tabFrame1.offset = 0
@@ -35,7 +39,6 @@ tabFrame1List:SetScript("OnVerticalScroll", function(self, offset)
 	tabFrame1:Refresh()
 end)
 tabFrame1List:SetBackdropBorderColor(0.6, 0.6, 0.6, 0.6)
-tabFrame1List:SetBackdrop(nil)
 
 local tabFrame1ScrollBar = _G[tabFrame1List:GetName() .. "ScrollBar"]
 tabFrame1ScrollBar:SetMinMaxValues(0, 11)
@@ -58,12 +61,11 @@ end)
 _G[tabFrame1ScrollBar:GetName() .. "ThumbTexture"]:SetSize(12, 16)
 
 tabFrame1:EnableMouseWheel(true)
-tabFrame1:SetScript("OnMouseWheel", function(self, delta)
+tabFrame1:SetScript("OnMouseWheel", function(_, delta)
 	tabFrame1ScrollBar:SetValue(tabFrame1ScrollBar:GetValue() - (delta * 16))
 end)
 
 local ClickFrame = CreateFrame("Button", nil, UIParent)
-ClickFrame:SetAllPoints(DBM_GUI_OptionsFrame)
 ClickFrame:SetFrameStrata("TOOLTIP")
 ClickFrame:RegisterForClicks("AnyDown")
 ClickFrame:SetScript("OnClick", function()
@@ -172,7 +174,7 @@ function tabFrame1:Refresh()
 	end
 	local bwidth = 0
 	for _, button in pairs(self.buttons) do
-		bwidth = math.max(bwidth, button:GetTextWidth() + 16)
+		bwidth = mmax(bwidth, button:GetTextWidth() + 16)
 	end
 	for _, button in pairs(self.buttons) do
 		button:SetWidth(bwidth)
@@ -212,7 +214,7 @@ function DBM_GUI:CreateDropdown(title, values, vartype, var, callfunc, width, he
 		if title ~= L.Warn_FontType and title ~= L.Warn_FontStyle and title ~= L.Bar_Font then
 			for _, v in ipairs(values) do
 				dropdownText:SetText(v.text)
-				width = math.max(width, dropdownText:GetStringWidth())
+				width = mmax(width, dropdownText:GetStringWidth())
 			end
 		end
 	end

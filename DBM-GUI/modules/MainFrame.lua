@@ -1,7 +1,10 @@
 local L		= DBM_GUI_L
 local CL	= DBM_CORE_L
 
-local frame = DBM_GUI_OptionsFrame
+local DBM = DBM
+local CreateFrame = CreateFrame
+
+local frame = _G["DBM_GUI_OptionsFrame"]
 table.insert(_G["UISpecialFrames"], frame:GetName())
 frame:SetFrameStrata("DIALOG")
 if DBM.Options.GUIPoint then
@@ -21,7 +24,8 @@ frame:SetClampedToScreen(true)
 frame:SetUserPlaced(true)
 frame:RegisterForDrag("LeftButton")
 frame:SetFrameLevel(frame:GetFrameLevel() + 4)
-frame:SetMinResize(800, 600)
+frame:SetMinResize(800, 400)
+frame:SetMaxResize(UIParent:GetWidth(), UIParent:GetHeight())
 frame:Hide()
 frame:SetBackdrop({
 	bgFile		= "Interface\\DialogFrame\\UI-DialogBox-Background", -- 131071
@@ -39,7 +43,7 @@ frame:SetScript("OnShow", function(self)
 	end
 end)
 frame:SetScript("OnHide", function()
-	DBM_GUI_DropDown:Hide()
+	_G["DBM_GUI_DropDown"]:Hide()
 end)
 frame:SetScript("OnDragStart", frame.StartMoving)
 frame:SetScript("OnDragStop", function(self)
@@ -51,6 +55,12 @@ frame:SetScript("OnDragStop", function(self)
 end)
 frame:SetScript("OnSizeChanged", function(self)
 	self:UpdateMenuFrame()
+	if DBM_GUI.currentViewing then
+		self:DisplayFrame(DBM_GUI.currentViewing)
+	end
+end)
+frame:SetScript("OnMouseUp", function(self)
+	self:StopMovingOrSizing()
 end)
 frame.tabs = {}
 
@@ -63,11 +73,6 @@ frameResize:SetScript("OnMouseDown", function()
 end)
 frameResize:SetScript("OnMouseUp", function()
 	frame:StopMovingOrSizing()
-	frame:UpdateMenuFrame()
-	local container = _G[frame:GetName() .. "PanelContainer"]
-	if container.displayedFrame then
-		frame:DisplayFrame(container.displayedFrame)
-	end
 	DBM.Options.GUIWidth = frame:GetWidth()
 	DBM.Options.GUIHeight = frame:GetHeight()
 end)
@@ -84,7 +89,7 @@ frameHeaderText:SetText(L.MainFrame)
 local frameRevision = frame:CreateFontString("$parentRevision", "ARTWORK", "GameFontDisableSmall")
 frameRevision:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", 20, 18)
 if DBM.NewerVersion then
-	frameRevision:SetText(CL.DEADLY_BOSS_MODS.. " " .. DBM.DisplayVersion.. " (" .. DBM:ShowRealDate(DBM.Revision) .. "). |cffff0000Version " .. DBM.NewerVersion.. " is available.|r")
+	frameRevision:SetText(CL.DEADLY_BOSS_MODS.. " " .. DBM.DisplayVersion.. " (" .. DBM:ShowRealDate(DBM.Revision) .. "). |cffff0000Version " .. DBM.NewerVersion .. " is available.|r")
 else
 	frameRevision:SetText(CL.DEADLY_BOSS_MODS.. " " .. DBM.DisplayVersion.. " (" .. DBM:ShowRealDate(DBM.Revision) .. ")")
 end
@@ -94,16 +99,6 @@ frameTranslation:SetPoint("LEFT", frameRevision, "RIGHT", 20, 0)
 if L.TranslationBy then
 	frameTranslation:SetText(L.TranslationByPrefix .. L.TranslationBy)
 end
-
-local frameWebsite = frame:CreateFontString("$parentWebsite", "ARTWORK", "GameFontNormal")
-frameWebsite:SetPoint("BOTTOMLEFT", frameRevision, "TOPLEFT", 0, 15)
-frameWebsite:SetText(L.Website)
-
-local frameWebsiteButtonA = CreateFrame("Frame", nil, frame)
-frameWebsiteButtonA:SetAllPoints(frameWebsite)
-frameWebsiteButtonA:SetScript("OnMouseUp", function()
-	DBM:ShowUpdateReminder(nil, nil, CL.COPY_URL_DIALOG, "https://discord.gg/deadlybossmods")
-end)
 
 local frameOkay = CreateFrame("Button", "$parentOkay", frame, "UIPanelButtonTemplate")
 frameOkay:SetSize(96, 22)
@@ -119,6 +114,17 @@ frameOkay:SetScript("OnClick", function()
 		StopMusic()
 		DBM.Options.musicPlaying = nil
 	end
+end)
+
+local frameWebsite = frame:CreateFontString("$parentWebsite", "ARTWORK", "GameFontNormal")
+frameWebsite:SetPoint("BOTTOMLEFT", frameRevision, "TOPLEFT", 0, 15)
+frameWebsite:SetPoint("RIGHT", frameOkay, "RIGHT")
+frameWebsite:SetText(L.Website)
+
+local frameWebsiteButtonA = CreateFrame("Frame", nil, frame)
+frameWebsiteButtonA:SetAllPoints(frameWebsite)
+frameWebsiteButtonA:SetScript("OnMouseUp", function()
+	DBM:ShowUpdateReminder(nil, nil, CL.COPY_URL_DIALOG, "https://discord.gg/deadlybossmods")
 end)
 
 local frameWebsiteButton = CreateFrame("Button", "$parentWebsiteButton", frame, "UIPanelButtonTemplate")
@@ -146,7 +152,7 @@ end
 local frameList = CreateFrame("Frame", "$parentList", frame, "OptionsFrameListTemplate")
 frameList:SetWidth(205)
 frameList:SetPoint("TOPLEFT", 22, -40)
-frameList:SetPoint("BOTTOMLEFT", frameWebsite, "BOTTOMLEFT", 0, 14)
+frameList:SetPoint("BOTTOMLEFT", frameWebsite, "TOPLEFT", 0, 5)
 frameList:SetScript("OnShow", function()
 	frame:UpdateMenuFrame()
 end)
@@ -154,18 +160,14 @@ frameList.offset = 0
 frameList:SetBackdropBorderColor(0.6, 0.6, 0.6, 1)
 frameList.buttons = {}
 for i = 1, math.floor(UIParent:GetHeight() / 18) do
-	local button = CreateFrame("Button", frameList:GetName() .. "Button" .. i, frameList)
+	local button = CreateFrame("Button", "$parentButton" .. i, frameList)
 	button:SetHeight(18)
-	button.text = button:CreateFontString(button:GetName() .. "Text", "ARTWORK", "GameFontNormalSmall")
+	button.text = button:CreateFontString("$parentText", "ARTWORK", "GameFontNormalSmall")
 	button:RegisterForClicks("LeftButtonUp")
 	button:SetScript("OnClick", function(self)
 		frame:ClearSelection()
-		for _, tab in ipairs(frame.tabs) do
-			tab.selection = nil
-		end
-		frame.tabs[frame.tab].selection = button
-		button:LockHighlight()
-		DBM_GUI.currentViewing = self.element
+		frame.tabs[frame.tab].selection = self.element
+		self:LockHighlight()
 		frame:DisplayFrame(self.element)
 	end)
 	if i == 1 then

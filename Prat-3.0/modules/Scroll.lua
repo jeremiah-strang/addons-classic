@@ -233,11 +233,11 @@ L = {
 		["Scroll"] = "Scrollen",
 		["Set Ctrl+MouseWheel Speed"] = "Geschwindigkeit für <Strg>-Mausrad einstellen",
 		["Set MouseWheel Speed"] = "Geschwindigkeit des Mausrads einstellen",
-		["Set number of lines mousewheel will scroll when ctrl is pressed."] = "Anzahl der Zeilen, die per Mausrad weitergescrollt werden, während <Strg> gedrückt wird, einstellen.",
-		["Set number of lines mousewheel will scroll."] = "Zeilenanzahl einstellen, die das Mausrad weiterscrollt.",
+		["Set number of lines mousewheel will scroll when ctrl is pressed."] = "Die Anzahl der Zeilen festlegen, mit denen das Mausrad einen Textlauf durchführt, während die Strg-Taste gedrückt wird.",
+		["Set number of lines mousewheel will scroll."] = "Stellt die Anzahl der Zeilen ein, mit denen das Mausrad einen Textlauf durchführt.",
 		["Set TheLowDown Delay"] = "TheLowDown-Verzögerung einstellen",
 		["Set time to wait before jumping to the bottom of chat windows."] = "Wartezeit einstellen, ehe zum Ende von Chatfenstern gesprungen wird.",
-		["Text scroll direction"] = "Scroll-Richtung im Text",
+		["Text scroll direction"] = "Textlaufrichtung",
 		["Top"] = "Von oben nach unten",
 	}
 }
@@ -541,7 +541,9 @@ end
   function module:OnModuleDisable()
     for k, v in pairs(Prat.Frames) do
       self:MouseWheel(v, false)
-      self:LowDown(v, false)
+      if not IsCombatLog(v) then
+        self:LowDown(v, false)
+      end
     end
 
     self:SetScrollDirection("BOTTOM")
@@ -561,7 +563,9 @@ end
   function module:ConfigureAllFrames()
     for k, v in pairs(Prat.Frames) do
       self:MouseWheel(v, self.db.profile.mousewheel[k])
-      self:LowDown(v, self.db.profile.lowdown[k])
+      if not IsCombatLog(v) then
+        self:LowDown(v, self.db.profile.lowdown[k])
+      end
     end
 
     self:SetScrollDirection(self.db.profile.scrolldirection)

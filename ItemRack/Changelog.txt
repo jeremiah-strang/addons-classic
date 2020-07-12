@@ -1,3 +1,43 @@
+__ New in 3.45 - By Rottenbeer __
+* Updated TOC version to 11305
+
+__ New in 3.44 - By Rottenbeer __
+* Add option for per-set cloak/helm visibility
+* Added the spell fail event  for casting events
+
+Thanks to blastehh and btnmasher!
+
+__ New in 3.43 - By Rottenbeer __
+* Fixed item swap failure during casting
+Attempting to item swap during casting will now wait for an end-combat, or cancel-casting event before swapping instead of failing.
+A known bug is it won't finish the swap if you complete a cast but do not enter combat (e.g. autoqueue item comes off cd while you are mounting)
+
+Thanks to blastehh!
+
+__ New in 3.42 - By Rottenbeer __
+* Fix for alt+click queue toggle
+Auto queue wasn't working due to mismatching usage of 'true' and '1'
+
+Thanks to blastehh!
+__ New in 3.41 - By Rottenbeer __
+* Fix individual slot queue toggle
+The addon currently tries to queue all slots and ignores the checkbox "Auto queue this slot"
+This will make it check the table to see if the box was actually ticked before queuing a slot.
+
+Thanks to blastehh
+__ New in 3.40 - By Rottenbeer __
+* version bump for curseforge
+
+__ New in 3.39 - By Rottenbeer __
+* ZoneEvents: check for subzones and indoor area changes
+
+__ New in 3.38 - By Rottenbeer __
+* Prevent unequipping sets that are not marked to unequip for buff events
+Thanks to davismj for the pull request
+
+__ New in 3.37 - By Rottenbeer __
+* Incremented release version to fix cyclic updates on curseforge
+
 __ New in 3.36 - By Rottenbeer __
 * Manual changelog on curseforge
 

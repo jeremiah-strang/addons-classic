@@ -1,5 +1,9 @@
-local L = DBM_GUI_L
+local L		= DBM_GUI_L
 local CL	= DBM_CORE_L
+
+local setmetatable, select, type, tonumber, strsplit, mmax, tinsert, tremove = setmetatable, select, type, tonumber, strsplit, math.max, table.insert, table.remove
+local CreateFrame, GetCursorPosition, UIParent, GameTooltip, NORMAL_FONT_COLOR, GameFontNormal = CreateFrame, GetCursorPosition, UIParent, GameTooltip, NORMAL_FONT_COLOR, GameFontNormal
+local DBM, DBM_GUI = DBM, DBM_GUI
 
 local PanelPrototype = {}
 setmetatable(PanelPrototype, {
@@ -14,21 +18,12 @@ function PanelPrototype:SetLastObj(obj)
 	self.lastobject = obj
 end
 
-function PanelPrototype:AutoSetDimension(additionalHeight)
-	if not self.frame.mytype == "area" then
-		return
-	end
-	local need_height = 25 + (additionalHeight or 0)
+function PanelPrototype:AutoSetDimension() -- TODO: Remove in 9.x
+	DBM:Debug(self.frame:GetName() .. " is calling a deprecated function AutoSetDimension")
+end
 
-	for _, child in pairs({ self.frame:GetChildren() }) do
-		if child.myheight and type(child.myheight) == "number" then
-			need_height = need_height + child.myheight
-		else
-			need_height = need_height + child:GetHeight()
-		end
-	end
-	self.frame.myheight = need_height + 20
-	self.frame:SetHeight(need_height)
+function PanelPrototype:SetMyOwnHeight() -- TODO: remove in 9.x
+	DBM:Debug(self.frame:GetName() .. " is calling a deprecated function SetMyOwnHeight")
 end
 
 function PanelPrototype:CreateCreatureModelFrame(width, height, creatureid)
@@ -40,12 +35,14 @@ function PanelPrototype:CreateCreatureModelFrame(width, height, creatureid)
 	return model
 end
 
-function PanelPrototype:CreateText(text, width, autoplaced, style, justify)
+function PanelPrototype:CreateText(text, width, autoplaced, style, justify, myheight)
 	local textblock = self.frame:CreateFontString("DBM_GUI_Option_" .. self:GetNewID(), "ARTWORK")
 	textblock.mytype = "textblock"
+	textblock.myheight = myheight
 	textblock:SetFontObject(style or GameFontNormal)
 	textblock:SetText(text)
 	textblock:SetJustifyH(justify or "CENTER")
+	textblock.autowidth = not width
 	textblock:SetWidth(width or self.frame:GetWidth())
 	if autoplaced then
 		textblock:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 10, -10)
@@ -142,35 +139,28 @@ function PanelPrototype:CreateEditBox(text, value, width, height)
 	local textbox = CreateFrame("EditBox", "DBM_GUI_Option_" .. self:GetNewID(), self.frame, "InputBoxTemplate")
 	textbox.mytype = "textbox"
 	textbox:SetSize(width or 100, height or 20)
+	textbox:SetAutoFocus(false)
+	textbox:SetBackdrop({
+		bgFile		= "Interface\\Tooltips\\UI-Tooltip-Background", -- 137056
+		edgeFile	= "Interface\\Tooltips\\UI-Tooltip-Border", -- 137057
+		tile		= true,
+		tileSize	= 16,
+		edgeSize	= 16,
+		insets		= { left = 3, right = 3, top = 5, bottom = 3 }
+	})
+	textbox:SetBackdropColor(0.1, 0.1, 0.1, 0.6)
+	textbox:SetBackdropBorderColor(0.4, 0.4, 0.4)
 	textbox:SetScript("OnEscapePressed", function(self)
 		self:ClearFocus()
 	end)
 	textbox:SetScript("OnTabPressed", function(self)
 		self:ClearFocus()
 	end)
-	if type(value) == "string" then
-		textbox:SetText(value)
-	end
-	self:SetLastObj(textbox)
-	local textboxLeft = textbox:CreateTexture("$parentLeft", "BACKGROUND")
-	textboxLeft:SetTexture(130959) -- "Interface\ChatFrame\UI-ChatInputBorder-Left"
-	textboxLeft:SetSize(32, 32)
-	textboxLeft:SetPoint("LEFT", -14, 0)
-	textboxLeft:SetTexCoord(0, 0.125, 0, 1)
-	local textboxRight = textbox:CreateTexture("$parentRight", "BACKGROUND")
-	textboxRight:SetTexture(130960) -- "Interface\ChatFrame\UI-ChatInputBorder-Right"
-	textboxRight:SetSize(32, 32)
-	textboxRight:SetPoint("RIGHT", 6, 0)
-	textboxRight:SetTexCoord(0.875, 1, 0, 1)
-	local textboxMiddle = textbox:CreateTexture("$parentMiddle", "BACKGROUND")
-	textboxMiddle:SetTexture(130960) -- "Interface\ChatFrame\UI-ChatInputBorder-Right"
-	textboxMiddle:SetSize(1, 32)
-	textboxMiddle:SetPoint("LEFT", textboxLeft, "RIGHT")
-	textboxMiddle:SetPoint("RIGHT", textboxRight, "LEFT")
-	textboxMiddle:SetTexCoord(0, 0.9375, 0, 1)
+	textbox:SetText(value)
 	local textboxText = textbox:CreateFontString("$parentText", "BACKGROUND", "GameFontNormalSmall")
 	textboxText:SetPoint("TOPLEFT", textbox, "TOPLEFT", -4, 14)
 	textboxText:SetText(text)
+	self:SetLastObj(textbox)
 	return textbox
 end
 
@@ -186,7 +176,7 @@ function PanelPrototype:CreateLine(text)
 	linetext:SetHeight(18)
 	linetext:SetTextColor(0.67, 0.83, 0.48)
 	linetext:SetText(text or "")
-	local linebg = line:CreateTexture()
+	local linebg = line:CreateTexture("$parentBG")
 	linebg:SetTexture(137056) -- "Interface\\Tooltips\\UI-Tooltip-Background"
 	linebg:SetSize(self.frame:GetWidth() - linetext:GetWidth() - 25, 2)
 	linebg:SetPoint("RIGHT", line, "RIGHT", 0, 0)
@@ -194,9 +184,6 @@ function PanelPrototype:CreateLine(text)
 	if x.mytype == "checkbutton" or x.mytype == "line" then
 		line:ClearAllPoints()
 		line:SetPoint("TOPLEFT", x, "TOPLEFT", 0, -x.myheight)
-	else
-		line:ClearAllPoints()
-		line:SetPoint("TOPLEFT", 10, -12)
 	end
 	self:SetLastObj(line)
 	return line
@@ -220,20 +207,19 @@ do
 	local sounds = DBM_GUI:MixinSharedMedia3("sound", {
 		-- Inject basically dummy values for ordering special warnings to just use default SW sound assignments
 		{ text = L.None, value = "None" },
-		{ text = "SW 1", value = 1 },
-		{ text = "SW 2", value = 2 },
-		{ text = "SW 3", value = 3 },
-		{ text = "SW 4", value = 4 },
+		{ text = "SA 1", value = 1 },
+		{ text = "SA 2", value = 2 },
+		{ text = "SA 3", value = 3 },
+		{ text = "SA 4", value = 4 },
 		-- Inject DBMs custom media that's not available to LibSharedMedia because it uses SoundKit Id (which LSM doesn't support)
 		--{ text = "AirHorn (DBM)",			value = "Interface\\AddOns\\DBM-Core\\sounds\\AirHorn.ogg" },
 		{ text = "Algalon: Beware!",		value = "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\UR_Algalon_BHole01.ogg" },
 		{ text = "BB Wolf: Run Away",		value = "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\HoodWolfTransformPlayer01.ogg" },
-		--{ text = "Blizzard Raid Emote",	value = 37666 },
 		{ text = "Illidan: Not Prepared",	value = "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\BLACK_Illidan_04.ogg" },
 		{ text = "Illidan: Not Prepared2",	value = "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\VO_703_Illidan_Stormrage_03.ogg" },
 		{ text = "Kil'Jaeden: Destruction",	value = "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\KILJAEDEN02.ogg" },
 		{ text = "Loatheb: I see you",		value = "Interface\\AddOns\\DBM-Core\\sounds\\ClassicSupport\\LOA_NAXX_AGGRO02.ogg" },
-		{ text = "Night Elf Bell",			value = 11742 },
+		{ text = "Night Elf Bell",			value = 6674 },
 		{ text = "PvP Flag",				value = 8174 }
 	})
 	local tcolors = {
@@ -271,6 +257,12 @@ do
 			else
 				button:SetPoint("TOPLEFT", 10, -12)
 			end
+		end
+		button.SetPointOld = button.SetPoint
+		button.SetPoint = function(...)
+			button.customPoint = true
+			button.myheight = 0
+			button.SetPointOld(...)
 		end
 		local noteSpellName = name
 		if name:find("%$spell:ej") then -- It is journal link :-)
@@ -329,7 +321,6 @@ do
 					frame2 = CreateFrame("Button", "DBM_GUI_Option_" .. self:GetNewID(), self.frame, "UIPanelButtonTemplate")
 					frame2:SetPoint("LEFT", frame, "RIGHT", 35, 0)
 					frame2:SetSize(25, 25)
-					frame2.myheight = 0 -- Tells SetAutoDims that this button needs no additional space
 					frame2:SetText("|TInterface/FriendsFrame/UI-FriendsFrame-Note.blp:14:0:2:-1|t")
 					frame2.mytype = "button"
 					frame2:SetScript("OnClick", function(self)
@@ -338,11 +329,12 @@ do
 					textPad = 2
 				end
 			end
+			frame.myheight = 0
+			frame2.myheight = 0
 		end
-		local buttonText = button:CreateFontString("$parentText", "ARTWORK", "GameFontNormal")
-		buttonText:SetPoint("LEFT", button, "RIGHT", 0, 1)
+		local buttonText
 		if name then -- Switch all checkbutton frame to SimpleHTML frame (auto wrap)
-			buttonText = CreateFrame("SimpleHTML", buttonText:GetName(), button)
+			buttonText = CreateFrame("SimpleHTML", "$parentText", button)
 			buttonText:SetFontObject("GameFontNormal")
 			buttonText:SetHyperlinksEnabled(true)
 			buttonText:SetScript("OnHyperlinkEnter", function(self, data, link)
@@ -392,9 +384,13 @@ do
 			end)
 			buttonText:SetHeight(25)
 			name = "<html><body><p>" .. name .. "</p></body></html>"
+		else
+			buttonText = button:CreateFontString("$parentText", "ARTWORK", "GameFontNormal")
+			buttonText:SetPoint("LEFT", button, "RIGHT", 0, 1)
 		end
-		buttonText:SetWidth(self.frame:GetWidth() - 57 - (frame and frame:GetWidth() + frame2:GetWidth() or 0))
-		buttonText:SetText(name or CL.UNKNOWN)
+		buttonText.text = name or CL.UNKNOWN
+		buttonText.widthPad = frame and frame:GetWidth() + frame2:GetWidth() or 0
+		buttonText:SetWidth(self.frame:GetWidth() - buttonText.widthPad)
 		if textLeft then
 			buttonText:ClearAllPoints()
 			buttonText:SetPoint("RIGHT", frame2 or frame or button, "LEFT")
@@ -402,8 +398,10 @@ do
 		else
 			buttonText:SetJustifyH("LEFT")
 			buttonText:SetPoint("TOPLEFT", frame2 or frame or button, "TOPRIGHT", textPad or 0, -4)
-			button.myheight = math.max(buttonText:GetContentHeight() + 12, button.myheight)
+			button.myheight = mmax(buttonText:GetContentHeight() + 12, button.myheight)
 		end
+		buttonText:SetText(buttonText.text)
+		button.myheight = mmax(buttonText:GetContentHeight() + 12, 25)
 		if dbmvar and DBM.Options[dbmvar] ~= nil then
 			button:SetScript("OnShow", function(self)
 				button:SetChecked(DBM.Options[dbmvar])
@@ -433,13 +431,12 @@ do
 	end
 end
 
-function PanelPrototype:CreateArea(name, height)
+function PanelPrototype:CreateArea(name)
 	local area = CreateFrame("Frame", "DBM_GUI_Option_" .. self:GetNewID(), self.frame, "OptionsBoxTemplate")
 	area.mytype = "area"
 	area:SetBackdropColor(0.15, 0.15, 0.15, 0.5)
 	area:SetBackdropBorderColor(0.4, 0.4, 0.4)
 	_G[area:GetName() .. "Title"]:SetText(name)
-	area:SetSize(self.frame:GetWidth() - 12, height or self.frame:GetHeight() - 10)
 	if select("#", self.frame:GetChildren()) == 1 then
 		area:SetPoint("TOPLEFT", self.frame, 5, -20)
 	else
@@ -447,7 +444,7 @@ function PanelPrototype:CreateArea(name, height)
 	end
 	self:SetLastObj(area)
 	self.areas = self.areas or {}
-	table.insert(self.areas, {
+	tinsert(self.areas, {
 		frame	= area,
 		parent	= self
 	})
@@ -461,8 +458,8 @@ function PanelPrototype:Rename(newname)
 end
 
 function PanelPrototype:Destroy()
-	table.remove(DBM_GUI.frameTypes[self.frame.frameType], self.frame.categoryid)
-	table.remove(self.parent.panels, self.frame.panelid)
+	tremove(DBM_GUI.frameTypes[self.frame.frameType], self.frame.categoryid)
+	tremove(self.parent.panels, self.frame.panelid)
 	self.frame:Hide()
 end
 
@@ -470,11 +467,12 @@ do
 	local myid = 100
 
 	function DBM_GUI:CreateNewPanel(frameName, frameType, showSub, sortID, displayName)
-		local panel = CreateFrame("Frame", "DBM_GUI_Option_" .. self:GetNewID(), DBM_GUI_OptionsFramePanelContainer)
+		local panel = CreateFrame("Frame", "DBM_GUI_Option_" .. self:GetNewID(), _G["DBM_GUI_OptionsFramePanelContainer"])
 		panel.mytype = "panel"
 		panel.sortID = self:GetCurrentID()
-		panel:SetSize(DBM_GUI_OptionsFramePanelContainer:GetWidth(), DBM_GUI_OptionsFramePanelContainer:GetHeight())
-		panel:SetPoint("TOPLEFT", DBM_GUI_OptionsFramePanelContainer, "TOPLEFT")
+		local container = _G["DBM_GUI_OptionsFramePanelContainer"]
+		panel:SetSize(container:GetWidth(), container:GetHeight())
+		panel:SetPoint("TOPLEFT", "DBM_GUI_OptionsFramePanelContainer", "TOPLEFT")
 		panel.name = frameName
 		panel.displayName = displayName or frameName
 		panel.showSub = showSub or showSub == nil
@@ -492,7 +490,7 @@ do
 		panel.frameType = frameType
 		PanelPrototype:SetLastObj(panel)
 		self.panels = self.panels or {}
-		table.insert(self.panels, {
+		tinsert(self.panels, {
 			frame	= panel,
 			parent	= self
 		})

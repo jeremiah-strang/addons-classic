@@ -1,10 +1,10 @@
-## Interface: 11303
+## Interface: 11305
 ## Title: NugEnergy
 ## Notes: Energy monitor
 ## Author: d87
 ## SavedVariables: NugEnergyDB
 ## SavedVariablesPerCharacter: NugEnergyDB_Character
-## Version: 1.13.17
+## Version: 1.13.18
 
 ## X-WoWI-ID: 9099
 ## X-Curse-Project-ID: 43975
