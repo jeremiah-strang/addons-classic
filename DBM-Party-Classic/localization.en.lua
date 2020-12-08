@@ -524,6 +524,10 @@ L = DBM:GetModLocalization(416)
 L:SetGeneralLocalization{
 	name 		= "Cho'Rush the Observer"
 }
+
+L:SetMiscLocalization{
+    Defeat	= "The king is dead - OH NOES!  Summon Mizzle da Crafty!  He knows what to do next!"
+}
 -----------------------------
 --  King Gordok  --
 -----------------------------
@@ -1241,6 +1245,12 @@ L = DBM:GetModLocalization(455)
 
 L:SetGeneralLocalization{
 	name 		= "Ramstein the Gorger"
+}
+L:SetTimerLocalization{
+	TimerGuards	= "Sentries Spawn"
+}
+L:SetOptionLocalization{
+	TimerGuards	= "Upon defeat of boss, show timer for the arrival of Black Guard Sentries"
 }
 
 -----------------------------

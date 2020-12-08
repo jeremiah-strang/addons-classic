@@ -2,30 +2,32 @@
 ---NovaWorldBuffs classic realm list--
 --------------------------------------
 
+local addonName, addon = ...;
+local NWB = addon.a;
 --Only need layered realms here for now.
 NWB.usRealms = {
-	["Arugal"] = true,
+	--["Arugal"] = true,
 	--["Benediction"] = true,
 	--["Earthfury"] = true,
-	["Faerlina"] = true,
+	--["Faerlina"] = true,
 	--["Fairbanks"] = true,
-	["Herod"] = true,
+	--["Herod"] = true,
 	--["Pagle"] = true,
 	--["Sulfuras"] = true,
-	["Whitemane"] = true,
+	--["Whitemane"] = true,
 }
 
 NWB.euRealms = {
-	["Auberdine"] = true,
-	["Ashbringer"] = true,
-	["Firemaw"] = true,
-	["Flamegor"] = true,
-	["Gehennas"] = true,
-	["Golemagg"] = true,
-	["Mograine"] = true,
-	["Sulfuron"] = true,
-	["Venoxis"] = true,
-	["Пламегор"] = true,
+	--["Auberdine"] = true,
+	--["Ashbringer"] = true,
+	--["Firemaw"] = true,
+	--["Flamegor"] = true,
+	--["Gehennas"] = true,
+	--["Golemagg"] = true,
+	--["Mograine"] = true,
+	--["Sulfuron"] = true,
+	--["Venoxis"] = true,
+	--["Пламегор"] = true,
 }
 
 NWB.krRealms = {

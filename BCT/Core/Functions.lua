@@ -36,7 +36,7 @@ local function GetAura(name)
 
 	for k, v in pairs(BCT.session.db.auras[BCT.BUFF]) do
 		if name == GetSpellInfo(k) then
-			return true, v[5], v[3], v[8]
+			return true, v[5], v[3], v[8], k
 		end
 	end
 	
@@ -72,7 +72,7 @@ local function scanHand(hand)
 		end
 		if not buffname then
 			buffname, buffrank = strmatch(strfound, "(.*)(%d)");
-			-- specific fucking french language langue de feu
+			-- specific french language
 			if buffname then
 				local a = string.len(buffname);
 				buffname = string.sub(buffname, 1, a - 2);

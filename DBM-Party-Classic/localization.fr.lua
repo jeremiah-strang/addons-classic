@@ -283,6 +283,9 @@ L = DBM:GetModLocalization("PyroguardEmberseer")
 L:SetGeneralLocalization{
 	name 		= "Pyrogarde Prophète ardent"
 }
+L:SetMiscLocalization{
+	Pull		= "%s commence à retrouver ses forces !"
+}
 -----------------------------
 --  Solakar Flamewreath  --
 -----------------------------
@@ -519,6 +522,9 @@ L = DBM:GetModLocalization(416)
 
 L:SetGeneralLocalization{
 	name 		= "Cho'Rush l'Observateur"
+}
+L:SetMiscLocalization{
+    Defeat	= "Le roi est mort – OH NON ! Faut aller chercher Mizzle l’Ingénieux ! Y saura quoi faire !"
 }
 ----------------
 -- King Gordok --
@@ -1237,7 +1243,12 @@ L = DBM:GetModLocalization(455)
 L:SetGeneralLocalization{
 	name 		= "Ramstein Grandgosier"
 }
-
+L:SetTimerLocalization{
+	TimerGuards	= "Sentinelles apparaissent"
+}
+L:SetOptionLocalization{
+	TimerGuards	= "Après la défaite du boss, affichez le timer pour l'arrivée des Sentinelles de la Garde noire"
+}
 -----------------------------
 --  Baron Rivendare  --
 -----------------------------

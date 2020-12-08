@@ -1,5 +1,5 @@
 --[[
-    * Copyright (c) 2011-2013 by Adam Hellberg.
+    * Copyright (c) 2011-2020 by Adam Hellberg.
     *
     * This file is part of KillTrack.
     *
@@ -17,43 +17,44 @@
     * along with KillTrack. If not, see <http://www.gnu.org/licenses/>.
 --]]
 
+local NAME, KT = ...
+
+_G[NAME] = KT
+
 -- Upvalue some functions used in CLEU
 local UnitGUID = UnitGUID
 local UnitIsTapDenied = UnitIsTapDenied
 local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
 
-KillTrack = {
-    Name = "KillTrack",
-    Version = GetAddOnMetadata("KillTrack", "Version"),
-    Events = {},
-    Global = {},
-    CharGlobal = {},
-    Temp = {},
-    Sort = {
-        Desc = 0,
-        Asc = 1,
-        CharDesc = 2,
-        CharAsc = 3,
-        AlphaD = 4,
-        AlphaA = 5,
-        IdDesc = 6,
-        IdAsc = 7
-    },
-    Session = {
-        Count = 0,
-        Kills = {}
-    },
-    Messages = {
-        Announce = "[KillTrack] Session Length: %s. Session Kills: %d. Kills Per Minute: %.2f."
-    }
+local NO_NAME = "<No Name>"
+
+KT.Name = NAME
+KT.Version = GetAddOnMetadata(NAME, "Version")
+KT.Events = {}
+KT.Global = {}
+KT.CharGlobal = {}
+KT.Temp = {}
+KT.Sort = {
+    Desc = 0,
+    Asc = 1,
+    CharDesc = 2,
+    CharAsc = 3,
+    AlphaD = 4,
+    AlphaA = 5,
+    IdDesc = 6,
+    IdAsc = 7
+}
+KT.Session = {
+    Count = 0,
+    Kills = {}
+}
+KT.Messages = {
+    Announce = "[KillTrack] Session Length: %s. Session Kills: %d. Kills Per Minute: %.2f."
 }
 
-local KT = KillTrack
 local ET
 
-local KTT = KillTrack_Tools
-
-local IMMEDIATE_THRESHOLD_SOUND = "PVPTHROUGHQUEUE"
+local KTT = KT.Tools
 
 local FirstDamage = {} -- Tracks first damage to a mob registered by CLEU
 local LastDamage = {} -- Tracks whoever did the most recent damage to a mob
@@ -113,7 +114,7 @@ end
 
 function KT.Events.ADDON_LOADED(self, ...)
     local name = (select(1, ...))
-    if name ~= "KillTrack" then return end
+    if name ~= NAME then return end
     ET = KT.ExpTracker
     if type(_G["KILLTRACK"]) ~= "table" then
         _G["KILLTRACK"] = {}
@@ -178,7 +179,7 @@ function KT.Events.ADDON_LOADED(self, ...)
 end
 
 function KT.Events.COMBAT_LOG_EVENT_UNFILTERED(self)
-    local timestamp, event, hideCaster, s_guid, s_name, s_flags, s_raidflags, d_guid, d_name, d_flags, d_raidflags = CombatLogGetCurrentEventInfo()
+    local _, event, _, _, s_name, _, _, d_guid, d_name, _, _ = CombatLogGetCurrentEventInfo()
     if combat_log_damage_events[event] then
         if FirstDamage[d_guid] == nil then
             -- s_name is (probably) the player who first damaged this mob and probably has the tag
@@ -219,8 +220,10 @@ function KT.Events.COMBAT_LOG_EVENT_UNFILTERED(self)
     -- if DamageValid[guid] is set, it can be used to decide if the kill was valid with 100% certainty
     if DamageValid[d_guid] ~= nil then
         pass = DamageValid[d_guid]
-    else -- The one who dealt the very first bit of damage was probably the one who got the tag on the mob
-        -- This should apply in most (if not all) situations and is probably a safe fallback when we couldn't retrieve tapped status from GUID->Unit
+    else
+        -- The one who dealt the very first bit of damage was probably the one who got the tag on the mob
+        -- This should apply in most (if not all) situations and is probably a safe fallback when we couldn't
+        -- retrieve tapped status from GUID->Unit
         pass = firstByPlayer or firstByGroup
     end
 
@@ -237,7 +240,7 @@ function KT.Events.COMBAT_LOG_EVENT_UNFILTERED(self)
     end
 end
 
-function KT.Events.UPDATE_MOUSEOVER_UNIT(self, ...)
+function KT.Events.UPDATE_MOUSEOVER_UNIT(self)
     if not self.Global.TOOLTIP then return end
     if UnitIsPlayer("mouseover") then return end
     local id = KTT:GUIDToID(UnitGUID("mouseover"))
@@ -262,7 +265,7 @@ function KT.Events.CHAT_MSG_COMBAT_XP_GAIN(self, message)
     ET:CheckMessage(message)
 end
 
-function KT.Events.ENCOUNTER_START(self, encounterID, name, difficulty, size)
+function KT.Events.ENCOUNTER_START(self, _, _, _, size)
     if (self.Global.DISABLE_DUNGEONS and size == 5) or (self.Global.DISABLE_RAIDS and size > 5) then
         self.Frame:UnregisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
         self.Frame:UnregisterEvent("UPDATE_MOUSEOVER_UNIT")
@@ -270,7 +273,7 @@ function KT.Events.ENCOUNTER_START(self, encounterID, name, difficulty, size)
     end
 end
 
-function KT.Events.ENCOUNTER_END(self, encounterID, name, difficulty, size)
+function KT.Events.ENCOUNTER_END(self, _, _, _, size)
     if (self.Global.DISABLE_DUNGEONS and size == 5) or (self.Global.DISABLE_RAIDS and size > 5) then
         self.Frame:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
         self.Frame:RegisterEvent("UPDATE_MOUSEOVER_UNIT")
@@ -351,7 +354,7 @@ function KT:ToggleCountMode()
 end
 
 function KT:InitMob(id, name)
-    name = name or "<No Name>"
+    name = name or NO_NAME
 
     if type(self.Global.MOBS[id]) ~= "table" then
         self.Global.MOBS[id] = { Name = name, Kills = 0, AchievCount = 0 }
@@ -371,16 +374,18 @@ function KT:InitMob(id, name)
         self.CharGlobal.MOBS[id].Name = name
     end
 
-    return self:GetMob(id)
+    return self.Global.MOBS[id], self.CharGlobal.MOBS[id]
 end
 
 function KT:AddKill(id, name)
-    name = name or "<No Name>"
+    name = name or NO_NAME
     self:InitMob(id, name)
     self.Global.MOBS[id].Kills = self.Global.MOBS[id].Kills + 1
     self.CharGlobal.MOBS[id].Kills = self.CharGlobal.MOBS[id].Kills + 1
     if self.Global.PRINTKILLS then
-        self:Msg(("Updated %q, new kill count: %d. Kill count on this character: %d"):format(name, self.Global.MOBS[id].Kills, self.CharGlobal.MOBS[id].Kills))
+        local kills = self.Global.MOBS[id].Kills
+        local cKills = self.CharGlobal.MOBS[id].Kills
+        self:Msg(("Updated %q, new kill count: %d. Kill count on this character: %d"):format(name, kills, cKills))
     end
     self:AddSessionKill(name)
     if self.Immediate.Active then
@@ -389,9 +394,12 @@ function KT:AddKill(id, name)
         if filterPass then
             self.Immediate:AddKill()
             if self.Global.IMMEDIATE.THRESHOLD > 0 and self.Immediate.Kills % self.Global.IMMEDIATE.THRESHOLD == 0 then
-                PlaySound("RaidWarning")
-                PlaySound("PVPTHROUGHQUEUE")
-                RaidNotice_AddMessage(RaidWarningFrame, ("%d KILLS!"):format(self.Immediate.Kills), ChatTypeInfo["SYSTEM"])
+                PlaySound(SOUNDKIT.RAID_WARNING)
+                PlaySound(SOUNDKIT.PVP_THROUGH_QUEUE)
+                RaidNotice_AddMessage(
+                    RaidWarningFrame,
+                    ("%d KILLS!"):format(self.Immediate.Kills),
+                    ChatTypeInfo.SYSTEM)
             end
         end
     end
@@ -410,6 +418,28 @@ function KT:AddKill(id, name)
     end
 end
 
+function KT:SetKills(id, name, globalCount, charCount)
+    if type(id) ~= "number" then
+        error("'id' argument must be a number")
+    end
+
+    if type(globalCount) ~= "number" then
+        error("'globalCount' argument must be a number")
+    end
+
+    if type(charCount) ~= "number" then
+        error("'charCount' argument must be a number")
+    end
+
+    name = name or NO_NAME
+
+    self:InitMob(id, name)
+    self.Global.MOBS[id].Kills = globalCount
+    self.CharGlobal.MOBS[id].Kills = charCount
+
+    self:Msg(("Updated %q to %d global and %d character kills"):format(name, globalCount, charCount))
+end
+
 function KT:AddSessionKill(name)
     if self.Session.Kills[name] then
         self.Session.Kills[name] = self.Session.Kills[name] + 1
@@ -420,7 +450,7 @@ function KT:AddSessionKill(name)
 end
 
 function KT:SetExp(name, exp)
-    for id, mob in pairs(self.Global.MOBS) do
+    for _, mob in pairs(self.Global.MOBS) do
         if mob.Name == name then mob.Exp = tonumber(exp) end
     end
 end
@@ -464,8 +494,8 @@ end
 
 function KT:GetTotalKills()
     local count = 0
-    for k,v in pairs(self.Global.MOBS) do
-        count = count + v.Kills
+    for _, mob in pairs(self.Global.MOBS) do
+        count = count + mob.Kills
     end
     return count
 end
@@ -482,10 +512,10 @@ end
 
 function KT:PrintKills(identifier)
     local found = false
-    local name = "<No Name>"
+    local name = NO_NAME
     local gKills = 0
     local cKills = 0
-    if type(identifier) ~= "string" and type(identifier) ~= "number" then identifier = "<No Name>" end
+    if type(identifier) ~= "string" and type(identifier) ~= "number" then identifier = NO_NAME end
     for k,v in pairs(self.Global.MOBS) do
         if type(v) == "table" and (tostring(k) == tostring(identifier) or v.Name == identifier) then
             name = v.Name
@@ -528,14 +558,14 @@ function KT:KillAlert(mob)
         FrameStyle = "GuildAchievement"
     }
     if IsAddOnLoaded("Glamour") then
-        if not GlamourShowAlert then
+        if not _G.GlamourShowAlert then
             KT:Msg("ERROR: GlamourShowAlert == nil! Notify AddOn developer.")
             return
         end
-        GlamourShowAlert(500, data)
+        _G.GlamourShowAlert(500, data)
     else
-        RaidNotice_AddMessage(RaidBossEmoteFrame, data.Text, ChatTypeInfo["SYSTEM"])
-        RaidNotice_AddMessage(RaidBossEmoteFrame, data.Text, ChatTypeInfo["SYSTEM"])
+        RaidNotice_AddMessage(RaidBossEmoteFrame, data.Text, ChatTypeInfo.SYSTEM)
+        RaidNotice_AddMessage(RaidBossEmoteFrame, data.Text, ChatTypeInfo.SYSTEM)
     end
     self:Msg(data.Text)
 end

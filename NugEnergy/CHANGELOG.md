@@ -1,8 +1,75 @@
 # NugEnergy
 
-## [1.13.18](https://github.com/rgd87/NugEnergy/tree/1.13.18) (2020-07-10)
-[Full Changelog](https://github.com/rgd87/NugEnergy/compare/1.13.17...1.13.18) [Previous Releases](https://github.com/rgd87/NugEnergy/releases)
+## [9.0.6-classic](https://github.com/rgd87/NugEnergy/tree/9.0.6-classic) (2020-12-06)
+[Full Changelog](https://github.com/rgd87/NugEnergy/compare/9.0.6...9.0.6-classic) [Previous Releases](https://github.com/rgd87/NugEnergy/releases)
 
+- Fixed merge  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Added zhCN localization  
 - Energy Tick Filtering  
 - Merge remote-tracking branch 'origin/master' into classic  
-- Text proxy frame to elevate text above border  
+- Druid powershifting setting in GUI  
+- Bugfix for Bear->Human switch  
+- Update luacheckrc  
+- Wolfshead Helm changes: Disabled druid mana by default, energy stays for 10 seconds after shifting out of cat  
+- Fixes for PR  
+- Merge pull request #6 from ayssia/patch-2  
+    Protect mana ticker from mp5 buffs  
+- Protect mana ticker from mp5 buffs  
+    MP5 buff ticks (Blessing of Wisdom, Nightfin Soup, etc.) resets 2sec mana tick abnormally. This is a try to fix it.  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Removed retail power types  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Disable smoothing when in ticker mode for mana  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Switched WoWI project id to main  
+- Updated TOC for 1.13.3  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Custom sound support  
+- FSR toggle and mana color support  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Heartbeat Sound on tick window  
+- Classic localization setup  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Merge remote-tracking branch 'origin/master' into classic  
+- changelog  
+- Merge remote-tracking branch 'origin/master' into classic  
+- changelog  
+- mana for all classes  
+- changelog  
+- fixed 5SR appearing when shifting to other forms  
+- tick window only for energy  
+- changelog  
+- GUI settings for mana  
+- Mana 5SR and Ticker  
+- Merge branch 'master' into classic  
+- Merge branch 'master' into classic  
+- Merge branch 'master' into classic  
+- toggle for energy ticker in GUI  
+- Merge remote-tracking branch 'origin/master' into classic  
+- Merge branch 'master' into classic  
+- changelog  
+- Merge branch 'master' into classic  
+- changelog  
+- Merge branch 'master' into classic  
+- gui settings for tick window  
+- separate color for tick window  
+- tick window feature  
+- Merge branch 'master' into classic  
+- Merge branch 'master' into classic  
+- changelog  
+- removed insufficent indicator on Bear's Rage bar  
+- Merge branch 'master' into classic  
+- changelog  
+- removed all settings for bfa power types  
+- Merge branch 'master' into classic  
+- Updated warrior setup for classic  
+- changes for classic, removed bfa setups  

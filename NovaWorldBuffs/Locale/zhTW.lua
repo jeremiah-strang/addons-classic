@@ -173,7 +173,7 @@ L["Resist Fire"] = "抵抗火焰"; -- LBRS fire resist buff.
 L["Blessing of Blackfathom"] = "黑暗深淵的祝福";
 
 L["zan"] = "贊達拉";
-L["zanFirstYellMsg"] = "贊達拉之魂，將在30秒後施放。";
+L["zanFirstYellMsg"] = "贊達拉之魂，將在%s秒後施放。";
 L["zanBuffDropped"] = "贊達拉之魂已經施放。";
 L["singleSongflowerMsg"] = "%s 的輕歌花重生在 %s。"; -- Songflower at Bloodvenom Post spawns at 1pm.
 L["spawn"] = "重生"; --Used in Felwood map marker tooltip (03:46pm spawn).
@@ -529,8 +529,8 @@ L["showBuffStatsTitle"] = "顯示增益次數";
 L["showBuffStatsDesc"] = "在/buff 框架顯示你獲得每個增益的次數?";
 
 L["buffResetButtonTooltip"] = "這將會重置所有增益\n增益次數資料不會被重置."; --/buff 框架的重置按鈕的提示。
-L["time"] = "次"; --Singular - This shows how many timers you got a buff. Example: (1 time)
-L["times"] = "次"; --Plural - This shows how many timers you got a buff. Example: (5 times)
+L["time"] = "(%s 次)"; --Singular - This shows how many timers you got a buff. Example: (1 time)
+L["times"] = "(%s 次)"; --Plural - This shows how many timers you got a buff. Example: (5 times)
 L["flowerWarning"] = "輕歌花的鏡像紀錄已啟動，但是你沒有在到達費伍德時先點擊NPC，所以沒有計時器被記錄。";
 
 L["mmColorTitle"] = "小地圖Layer顏色";
@@ -544,3 +544,65 @@ L["enableLayerButton"] = "啟動鏡像";
 L["disableLayerButton"] = "關閉鏡像";
 L["enableLayerButtonTooltip"] = "點擊以重新啟動鏡像,\n這將會將鏡像計時及圖層計算放回去。";
 L["disableLayerButtonTooltip"] = "在伺服器重開之後，後點擊取消舊的鏡像。\n這將會忽略這個插件移除鏡像。";
+
+L["Blackrock Mountain"] = "黑石山";
+
+L["onyxiaNpcKilledHordeWithTimer2"] = "奧妮克西婭增益NPC (倫薩克) 在 %s 前被殺了，在%s 後重生。";
+L["nefarianNpcKilledHordeWithTimer2"] = "奈法利安增益NPC (薩魯法爾) 在 %s 前被殺了，在%s 後重生。";
+L["onyxiaNpcKilledAllianceWithTimer2"] = "奧妮克西婭增益NPC (瑪丁雷) 在 %s 前被殺了，在%s 後重生。";
+L["nefarianNpcKilledAllianceWithTimer2"] = "奈法利安增益NPC (艾法希比) 在 %s 前被殺了，在%s 後重生。";
+
+L["onyxiaNpcRespawnHorde"] = "奧妮克西婭增益NPC (倫薩克) 將會在接下來的2分鐘內隨機重生。";
+L["nefarianNpcRespawnHorde"] = "奈法利安增益NPC (薩魯法爾)  將會在接下來的2分鐘內隨機重生。";
+L["onyxiaNpcRespawnAlliance"] = "奧妮克西婭增益NPC (瑪丁雷)  將會在接下來的2分鐘內隨機重生。";
+L["nefarianNpcRespawnAlliance"] = "奈法利安增益NPC (艾法希比)  將會在接下來的2分鐘內隨機重生。";
+
+L["soundsNpcKilledTitle"] = "NPC被殺";
+L["soundsNpcKilledDesc"] = "當NPC被殺重置時間時撥放音效。";
+
+L["autoDmfBuffCharsText"] = "暗月馬戲團特定字符增益設定：";
+
+L["middleNpcKilledTitle"] = "NPC被殺";
+L["middleNpcKilledDesc"] = "當黑妹或是奈法NPC被殺重置增益時間時，顯示一個團隊警告式樣的訊息在螢幕中間。";
+
+L["chatNpcKilledTitle"] = "NPC被殺";
+L["chatNpcKilledDesc"] = "當黑妹或是奈法NPC被殺重置增益時間時，在聊天顯示訊息。";
+
+L["flashNpcKilledTitle"] = "NPC被殺時閃爍";
+L["flashNpcKilledDesc"] = "當NPC被殺時，閃爍魔獸視窗?";
+
+
+
+
+
+
+
+L["timerWindowWidthTitle"] = "計時器視窗寬度";
+L["timerWindowWidthDesc"] = "計時器的視窗寬度。";
+
+L["timerWindowHeightTitle"] = "計時器視窗高度";
+L["timerWindowHeghtDesc"] = "計時器的視窗高度。";
+
+L["buffWindowWidthTitle"] = "增益視窗寬度";
+L["buffWindowWidthDesc"] = "增益視窗的寬度。";
+
+L["buffWindowHeightTitle"] = "增益視窗高度";
+L["buffWindowHeghtDesc"] = "增益視窗的高度。";
+
+L["dmfSettingsListTitle"] = "按月馬增益清單";
+L["dmfSettingsListDesc"] = "點擊這個顯示你的暗月增益設定哪個種類。";
+
+L["ignoreKillDataTitle"] = "忽略殺死NPC的訊息";
+L["ignoreKillDataDesc"] = "忽略任何NPC被殺死的資料。";
+
+L["noOverwriteTitle"] = "不要覆蓋計時器";
+L["noOverwriteDesc"] = "你可以開啟此選項，所以當你已經有一個計時器時，將不會再覆蓋新的計時，直到你的計時器結束。";
+
+L["layerMsg1"] = "你在一個Layer區域。";
+L["layerMsg2"] = "點擊這裡以觀看正確的計時器。";
+L["layerMsg3"] = "目標任何NPC以觀看你正確的Layer。";
+L["layerMsg4"] = "目標任何NPC在 %s 以觀看你正確的Layer。"; --Target any NPC in Orgrimmar to see your current layer.
+
+--NOTE: Darkmoon Faire buff type is now a character specific setting, changing buff type will only change it for this character.
+L["note"] = "註記:";
+L["dmfConfigWarning"] = "暗月馬戲團的增益種類特定設定，更改增益類型只會對此腳色進行修改。";

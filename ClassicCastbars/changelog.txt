@@ -1,3 +1,38 @@
+v1.3.15:
+- Bump toc version for Classic patch 1.13.6.
+- Fix Lua error introduced in v1.3.13 when upgrading from old addon versions.
+- Minor tweaks to options panel. Font options are now moved into its own tab.
+
+
+v1.3.14:
+- Set correct cast time for Kel'Thuzad's Frostbolt.
+- Possible fix for player castbar not applying custom colors correctly for some users.
+
+
+v1.3.13:
+- Fix uninterruptible cast data being nil until a reload ui when switching game locale.
+- Fix testmode sometimes requiring double button press when clicked initially without having a target.
+- Resetting addon settings will no longer wipe learned uninterruptible cast data.
+- Minor code cleanup and performance improvements.
+- Update Ace3 libraries.
+
+
+v1.3.12:
+- More improvements for uninterruptible cast data in AQ.
+- Set default Arcane Explosion cast time to 1.0s instead of 1.5s.
+- Addon will now show an error if the addon is loaded on a non-classic client.
+- Fix Hakkari Priest not resetting uninterruptible state after Anti Magic Shield expires. (requires LibClassicDurations)
+
+
+v1.3.11:
+- Improvements for uninterruptible cast data in AQ and Silithus.
+
+
+v1.3.10:
+- Fix horizontal text justification for text alignment option. Any custom XY offsets might need to be re-adjusted.
+- Localization updates.
+
+
 v1.3.9:
 - Bump toc version for patch 1.13.5.
 

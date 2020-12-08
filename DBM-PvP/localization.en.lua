@@ -34,8 +34,9 @@ L:SetOptionLocalization({
 })
 
 L:SetMiscLocalization({
+	BgStart120          = "The battle begins in 2 minutes.",
 	BgStart60           = "The battle begins in 1 minute.",
-	BgStart30           = "The battle begins in 30 seconds. Prepare yourselves!",
+	BgStart30           = "The battle begins in 30 seconds.",
 	ArenaInvite			= "Arena invite",
 	BasesToWin			= "Bases to win: %d",
 	WinBarText			= "%s wins",
@@ -61,6 +62,10 @@ L:SetMiscLocalization({
 --  Seething Shore  --
 ----------------------
 L = DBM:GetModLocalization("z1803")
+
+L:SetTimerLocalization({
+	TimerSpawn	= "%s"
+})
 
 L:SetOptionLocalization({
 	TimerSpawn	= "Show azerite spawn timer"
@@ -124,7 +129,8 @@ L:SetMiscLocalization({
 L = DBM:GetModLocalization("z727")
 
 L:SetTimerLocalization({
-	TimerRespawn	= "Cart respawn"
+	TimerRespawn	= "Cart respawn",
+	TimerCart		= "%s"
 })
 
 L:SetOptionLocalization({

@@ -1,4 +1,4 @@
-﻿## Interface: 11305
+﻿## Interface: 11306
 ## X-Min-Interface: 11302
 ## Title:|cffffe00a<|r|cffff7d0aDBM|r|cffffe00a>|r |cff69ccf0Azeroth (Classic)|r
 ## Title-deDE:|cffffe00a<|r|cffff7d0aDBM|r|cffffe00a>|r |cff69ccf0Azeroth (Classic)|r
@@ -18,7 +18,7 @@
 ## X-DBM-Mod-Type: RAID
 ## X-DBM-Mod-Category: Classic
 ## X-DBM-Mod-World-Boss: 1
-## X-DBM-Mod-Has-Single-Format: 1
+## X-DBM-StatTypes: normal
 ## X-DBM-Mod-Name: Azeroth (Classic)
 ## X-DBM-Mod-Name-deDE: Azeroth (Classic)
 ## X-DBM-Mod-Name-esES: Azeroth (Clásico)
@@ -33,11 +33,13 @@
 ## X-DBM-Mod-MapID: 0, 1
 ## X-DBM-Mod-LoadCID: 14889,14888,14887,14890,12397,6109
 ## X-DBM-Mod-MinCoreRevision: 12473
+## X-DBM-Mod-MinExpansion: 0
 localization.en.lua
 localization.de.lua
 localization.br.lua
 localization.fr.lua
 localization.es.lua
+localization.mx.lua
 localization.ru.lua
 localization.kr.lua
 localization.tw.lua

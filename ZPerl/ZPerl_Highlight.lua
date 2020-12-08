@@ -15,20 +15,62 @@ if LCC then
     UnitChannelInfo = function(unit) return LCC:UnitChannelInfo(unit); end
 end
 
-local GetNumSubgroupMembers = GetNumSubgroupMembers
+local IsClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+
+local _G = _G
+
+local bit = bit
+local cos = cos
+local format = format
+local math = math
+local min = min
+local next = next
+local pairs = pairs
+local random = random
+local sin = sin
+local strfind = strfind
+local tinsert = tinsert
+local tremove = tremove
+local type = type
+
+local CombatLogGetCurrentEventInfo = CombatLogGetCurrentEventInfo
+local CreateFrame = CreateFrame
+local GetActiveSpecGroup = GetActiveSpecGroup
 local GetNumGroupMembers = GetNumGroupMembers
+local GetNumSpecializations = GetNumSpecializations
+local GetNumSubgroupMembers = GetNumSubgroupMembers
+local GetNumTalents = GetNumTalents
+local GetSpellInfo = GetSpellInfo
+local GetTalentInfo = GetTalentInfo
 local GetTime = GetTime
-local UnitBuff = UnitBuff
+local GetUnitName = GetUnitName
+local IsInRaid = IsInRaid
+local UnitAura = UnitAura
 local UnitClass = UnitClass
+local UnitExists = UnitExists
+local UnitGetIncomingHeals = UnitGetIncomingHeals
+local UnitGUID = UnitGUID
+local UnitHealth = UnitHealth
+local UnitHealthMax = UnitHealthMax
 local UnitInParty = UnitInParty
 local UnitInRaid = UnitInRaid
-local UnitGUID = UnitGUID
-local UnitPlayerOrPetInRaid = UnitPlayerOrPetInRaid
-local UnitPlayerOrPetInParty = UnitPlayerOrPetInParty
+local UnitIsDead = UnitIsDead
+local UnitIsDeadOrGhost = UnitIsDeadOrGhost
+local UnitIsGhost = UnitIsGhost
+local UnitIsUnit = UnitIsUnit
 local UnitName = UnitName
-local cos = math.cos
-local sin = math.sin
-local band = bit.band
+local UnitPlayerOrPetInParty = UnitPlayerOrPetInParty
+local UnitPlayerOrPetInRaid = UnitPlayerOrPetInRaid
+
+local SecureButton_GetUnit = SecureButton_GetUnit
+
+local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE
+local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY
+local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID
+local COMBATLOG_OBJECT_FOCUS = COMBATLOG_OBJECT_FOCUS
+local COMBATLOG_OBJECT_TARGET = COMBATLOG_OBJECT_TARGET
+
+local UIParent = UIParent
 
 local new, del, copy = XPerl_GetReusableTable, XPerl_FreeTable, XPerl_CopyTable
 
@@ -124,7 +166,7 @@ local colours = {
 	TARGET = {r = 0.7167, g = 0.6833, b = 0.31467} -- Coloured so that colour * 1.2 == SEL colour
 }
 
-local xpHigh = CreateFrame("Frame", "XPerl_Highlight")
+local xpHigh = CreateFrame("Frame", "XPerl_Highlight", nil, BackdropTemplateMixin and "BackdropTemplate")
 xpHigh.list = {}
 xpHigh.callbacks = {}
 xpHigh.lastExpireCheck = 0
@@ -332,11 +374,6 @@ function xpHigh:SetHighlight(frame, guid)
 		if (r) then
 			local r1, g1, b1, r2, g2, b2, t1
 			for k, v in pairs(r) do
-				if k == "TARGET" then
-					if frame == XPerl_Player or frame == XPerl_Player_Pet or frame == XPerl_Target or frame == XPerl_TargetTarget or frame == XPerl_TargetTargetTarget or frame == XPerl_Focus or frame == XPerl_FocusTarget or frame == XPerl_partypet1 or frame == XPerl_partypet2 or frame == XPerl_partypet3 or frame == XPerl_partypet4 or frame == XPerl_partypet5 then
-						return
-					end
-				end
 				if (k == "POM" and conf.highlight.sparkles) then
 					pomActive = true
 				elseif (k == "HOTCOUNT") then
@@ -495,7 +532,7 @@ function xpHigh:CreateShieldBar(frame)
 		return
 	end
 
-	local f = CreateFrame("StatusBar", nil, parent)
+	local f = CreateFrame("StatusBar", nil, parent, BackdropTemplateMixin and "BackdropTemplate")
 	frame.highlight.shieldBar = f
 	f:SetPoint("BOTTOMLEFT")
 	f:SetPoint("TOPRIGHT", parent, "BOTTOMRIGHT", 0, 4)
@@ -581,7 +618,7 @@ function xpHigh:CreateHotBar(frame)
 		return
 	end
 
-	local f = CreateFrame("StatusBar", nil, parent)
+	local f = CreateFrame("StatusBar", nil, parent, BackdropTemplateMixin and "BackdropTemplate")
 	frame.highlight.hotBar = f
 	f:SetPoint("TOPLEFT")
 	f:SetPoint("BOTTOMRIGHT", parent, "TOPRIGHT", 0, -4)
@@ -610,7 +647,7 @@ end
 function xpHigh:GetMyHotTime(unit)
 	local maxDur, maxTimeLeft = 0, 0
 	for i = 1, 40 do
-		local name, _, _, _, dur, endTime = UnitBuff(unit, i, "PLAYER")
+		local name, _, _, _, dur, endTime = UnitAura(unit, i, "HELPFUL|PLAYER")
 		if (not name) then
 			break
 		end
@@ -688,7 +725,7 @@ end
 -- xpHigh:HasMyHOT(unit)
 function xpHigh:HasMyHOT(unit)
 	for i = 1, 40 do
-		local name = UnitBuff(unit, i, "PLAYER")
+		local name = UnitAura(unit, i, "HELPFUL|PLAYER")
 		if (not name) then
 			break
 		end
@@ -728,7 +765,7 @@ end
 -- GetMyPomEndTime
 function xpHigh:GetMyPomEndTime(unit)
 	for i = 1, 40 do
-		local name, _, _, _, _, endTime = UnitBuff(unit, i, "PLAYER")
+		local name, _, _, _, _, endTime = UnitAura(unit, i, "HELPFUL|PLAYER")
 		if (not name) then
 			break
 		end
@@ -827,7 +864,7 @@ function xpHigh:CreateMendingIcon(frame)
 			icon:SetParent(p)
 			icon:ClearAllPoints()
 		else
-			icon = CreateFrame("Frame", nil, p)
+			icon = CreateFrame("Frame", nil, p, BackdropTemplateMixin and "BackdropTemplate")
 			h.mending = icon
 			icon.tex = icon:CreateTexture(nil, "BACKGROUND")
 			icon.tex:SetAllPoints()
@@ -937,7 +974,7 @@ function xpHigh:StartMendingAnimation(sourceFrame, targetFrame)
 		icons = {}
 		self.mendingAnimationIcons = icons
 		for i = 1, 3 do
-			local icon = CreateFrame("Frame", nil, UIParent)
+			local icon = CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate")
 			icons[i] = icon
 			icon:SetFrameStrata("DIALOG")
 			icon:SetHeight((4 - i) * 8)
@@ -1164,7 +1201,7 @@ function xpHigh:SparkleAreaAddSpark(area, bias)
 
 	if (not spark) then
 		-- Create new spark
-		spark = CreateFrame("Frame", nil, XPerl_Highlight)
+		spark = CreateFrame("Frame", nil, XPerl_Highlight, BackdropTemplateMixin and "BackdropTemplate")
 		spark.tex = self:CreateShine(spark)
 		spark.tex:SetAllPoints()
 
@@ -1314,7 +1351,7 @@ end
 function xpHigh:checkEventFlags(dstFlags)
 	local dstMask = COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID
 	-- The Target and Focus flags are NON-EXCLUSIVE, so we can't just add them to the dstMask and mask them
-	return ((band(dstFlags, dstMask) ~= 0) or ((band(dstFlags, COMBATLOG_OBJECT_TARGET) ~= 0) or (band(dstFlags, COMBATLOG_OBJECT_FOCUS) ~= 0)))
+	return ((bit.band(dstFlags, dstMask) ~= 0) or ((bit.band(dstFlags, COMBATLOG_OBJECT_TARGET) ~= 0) or (bit.band(dstFlags, COMBATLOG_OBJECT_FOCUS) ~= 0)))
 end
 
 
@@ -1403,14 +1440,14 @@ function xpHigh.clEvents:SPELL_PERIODIC_HEAL(timestamp, event, srcGUID, srcName,
 
 					local index = 40
 					for i = 1, 39 do
-						local _, _, _, _, _, _, _, _, _, ID = UnitBuff(checkName, i, "PLAYER")
+						local _, _, _, _, _, _, _, _, _, ID = UnitAura(checkName, i, "HELPFUL|PLAYER")
 						if ID == spellID then
 							index = i
 							break
 						end
 					end
 
-					local _, _, _, _, _, endTime, isMine = UnitBuff(checkName, index, "PLAYER")
+					local _, _, _, _, _, endTime, isMine = UnitAura(checkName, index, "HELPFUL|PLAYER")
 
 					if (isMine) then
 						-- Figure out how many seconds are left in the HOT so we can ensure the flashy only stays up as long as the HOT is active
@@ -1606,7 +1643,7 @@ end
 -- xpHigh:HasMyPomPom(unit)
 function xpHigh:HasMyPomPom(unit)
 	for i = 1, 40 do
-		local name, _, _, _, _, endTime = UnitBuff(unit, i, "PLAYER")
+		local name, _, _, _, _, endTime = UnitAura(unit, i, "HELPFUL|PLAYER")
 		if (not name) then
 			break
 		end
@@ -1619,7 +1656,7 @@ end
 -- xpHigh:HasMyShield(unit)
 function xpHigh:HasMyShield(unit)
 	for i = 1, 40 do
-		local name, _, _, _, _, endTime = UnitBuff(unit, i, "PLAYER")
+		local name, _, _, _, _, endTime = UnitAura(unit, i, "HELPFUL|PLAYER")
 		if (not name) then
 			break
 		end
@@ -1704,7 +1741,7 @@ function xpHigh:UNIT_AURA(unit)
 	if (conf.highlight.HOTCOUNT) then
 		local hotCount = 0
 		for i = 1, 40 do
-			local name = UnitBuff(unit, i)
+			local name = UnitAura(unit, i, "HELPFUL")
 			if (not name) then
 				break
 			end
@@ -1777,7 +1814,7 @@ function xpHigh:OptionChange()
 		self:ClearAll("SHIELD")
 	end
 
-	if WOW_PROJECT_ID ~= WOW_PROJECT_CLASSIC then
+	if not IsClassic then
 		if (conf.highlight.enable and conf.highlight.HEAL) then
 			events = true
 			self:RegisterEvent("UNIT_HEAL_PREDICTION")

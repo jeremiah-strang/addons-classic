@@ -1,24 +1,29 @@
 local _, namespace = ...
 local PoolManager = namespace.PoolManager
+
 local activeGUIDs = {} -- unitID to unitGUID mappings
 local activeTimers = {} -- active cast data
 local activeFrames = {} -- visible castbar frames
+
 local npcCastTimeCacheStart = {}
 local npcCastTimeCache = {}
 local npcCastUninterruptibleCache = {}
 
-local addon = CreateFrame("Frame")
+if not _G.WOW_PROJECT_ID or (_G.WOW_PROJECT_ID ~= _G.WOW_PROJECT_CLASSIC) then
+    return print("|cFFFF0000[ERROR] ClassicCastbars only supports Classic WoW.|r")
+end
+
+local addon = CreateFrame("Frame", "ClassicCastbars")
 addon:RegisterEvent("PLAYER_LOGIN")
 addon:SetScript("OnEvent", function(self, event, ...)
     return self[event](self, ...)
 end)
-
 addon.AnchorManager = namespace.AnchorManager
 addon.defaultConfig = namespace.defaultConfig
 addon.activeFrames = activeFrames
 addon.activeTimers = activeTimers
+addon.npcCastUninterruptibleCache = npcCastUninterruptibleCache
 namespace.addon = addon
-ClassicCastbars = addon -- global ref for ClassicCastbars_Options
 
 -- upvalues for speed
 local strsplit = _G.string.split
@@ -50,9 +55,10 @@ local BARKSKIN = GetSpellInfo(22812)
 local FOCUSED_CASTING = GetSpellInfo(14743)
 local DIVINE_SHIELD = GetSpellInfo(642)
 local DIVINE_PROTECTION = GetSpellInfo(498)
+local ANTI_MAGIC_SHIELD = GetSpellInfo(24021)
 
 function addon:GetUnitType(unitID)
-    local unit = gsub(unitID or "", "%d", "")
+    local unit = gsub(unitID or "", "%d", "") -- remove numbers
     if unit == "nameplate-testmode" then
         unit = "nameplate"
     elseif unit == "party-testmode" then
@@ -94,8 +100,9 @@ function addon:CheckCastModifiers(unitID, cast)
 
     -- Buffs
     local libCD = LibStub and LibStub("LibClassicDurations", true)
+    local GetUnitAura = libCD and libCD.UnitAuraDirect or UnitAura
     for i = 1, 32 do
-        local name = libCD and libCD.UnitAuraDirect(unitID, i, "HELPFUL") or not libCD and UnitAura(unitID, i, "HELPFUL")
+        local name = GetUnitAura(unitID, i, "HELPFUL")
         if not name then break end -- no more buffs
 
         local modifier = castModifiers[name]
@@ -119,7 +126,7 @@ function addon:CheckCastModifiers(unitID, cast)
         -- Special cases
         if name == FOCUSED_CASTING or name == BARKSKIN then
             cast.hasPushbackImmuneModifier = true
-        elseif (name == DIVINE_PROTECTION or name == DIVINE_SHIELD) and not cast.isUninterruptible then
+        elseif (name == DIVINE_PROTECTION or name == DIVINE_SHIELD or name == ANTI_MAGIC_SHIELD) and not cast.isUninterruptible then
             cast.origIsUninterruptibleValue = cast.isUninterruptible
             cast.isUninterruptible = true
         elseif cast.origIsUninterruptibleValue then
@@ -203,10 +210,15 @@ function addon:StoreCast(unitGUID, spellName, spellID, iconTexturePath, castTime
         local _, _, _, _, _, npcID = strsplit("-", unitGUID)
         if npcID then
             cast.isUninterruptible = npcCastUninterruptibleCache[npcID .. spellName]
+            -- HACK: force show 2s cast time for Kel'Thuzad's Frostbolt
+            if npcID == "15990" and cast.spellID == 28478 then
+                cast.maxValue = 2
+                cast.endTime = currTime + 2
+            end
         end
     end
 
-    -- just nil previous values to avoid overhead of wiping table
+    -- just nil previous values to avoid overhead of wiping() table
     cast.origIsUninterruptibleValue = nil
     cast.hasCastSlowModified = nil
     cast.hasPushbackImmuneModifier = nil
@@ -371,11 +383,12 @@ end
 function addon:PLAYER_LOGIN()
     ClassicCastbarsDB = ClassicCastbarsDB or {}
 
-    if ClassicCastbarsDB.version == "11" then
-        ClassicCastbarsDB.party.position = nil
-    elseif ClassicCastbarsDB.version == "12" then
+    -- Delete some old invalid settings
+    if ClassicCastbarsDB.version and tonumber(ClassicCastbarsDB.version) <= 19 then
+        if ClassicCastbarsDB.party then
+            ClassicCastbarsDB.party.position = nil
+        end
         ClassicCastbarsDB.player = nil
-    elseif ClassicCastbarsDB.version == "18" or ClassicCastbarsDB.version == "19" then
         ClassicCastbarsDB.npcCastUninterruptibleCache = {}
     end
 
@@ -397,7 +410,7 @@ function addon:PLAYER_LOGIN()
         self.db.locale = GetLocale()
         self.db.target.castFont = _G.STANDARD_TEXT_FONT -- Font here only works for certain locales
         self.db.nameplate.castFont = _G.STANDARD_TEXT_FONT
-        self.db.npcCastUninterruptibleCache = {} -- Spell names are locale dependent
+        self.db.npcCastUninterruptibleCache = CopyTable(namespace.defaultConfig.npcCastUninterruptibleCache)
     end
 
     -- config is not needed anymore if options are not loaded
@@ -503,7 +516,6 @@ local playerInterrupts = namespace.playerInterrupts
 local ARCANE_MISSILES = GetSpellInfo(5143)
 local ARCANE_MISSILE = GetSpellInfo(7268)
 local BLESSING_OF_PROTECTION = GetSpellInfo(1022)
-local ANTI_MAGIC_SHIELD = GetSpellInfo(24021)
 
 function addon:COMBAT_LOG_EVENT_UNFILTERED()
     local _, eventType, _, srcGUID, srcName, srcFlags, _, dstGUID, _, dstFlags, _, _, spellName, _, missType = CombatLogGetCurrentEventInfo()
@@ -659,7 +671,6 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED()
             end
         end
     elseif eventType == "SPELL_MISSED" then
-        -- TODO: check if Improved Counterspell has same name as normal Counterspell here
         -- TODO: magical vs physical interrupts
         -- Auto learn if a spell is uninterruptible for NPCs by checking if an interrupt was immuned
         if missType == "IMMUNE" and playerInterrupts[spellName] then
@@ -669,7 +680,7 @@ function addon:COMBAT_LOG_EVENT_UNFILTERED()
             if bit_band(dstFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) <= 0 then -- dest unit is not a player
                 if bit_band(srcFlags, COMBATLOG_OBJECT_CONTROL_PLAYER) > 0 then -- source unit is player
                     local _, _, _, _, _, npcID = strsplit("-", dstGUID)
-                    if not npcID or npcID == "12457" then return end -- Blackwing Spellbinder
+                    if not npcID or npcID == "12457" or npcID == "11830" then return end -- Blackwing Spellbinder or Hakkari Priest
                     if npcCastUninterruptibleCache[npcID .. cast.spellName] then return end -- already added
 
                     -- Check for bubble immunity
@@ -702,23 +713,21 @@ addon:SetScript("OnUpdate", function(self, elapsed)
     -- Check if unit is moving to stop castbar, thanks to Cordankos for this idea
     refresh = refresh - elapsed
     if refresh < 0 then
-        if next(activeGUIDs) then
-            for unitID, unitGUID in next, activeGUIDs do
-                if unitID ~= "focus" then
-                    local cast = activeTimers[unitGUID]
-                    -- Only stop cast for players since some mobs runs while casting, also because
-                    -- of lag we have to only stop it if the cast has been active for atleast 0.25 sec
-                    if cast and cast.isPlayer and currTime - cast.timeStart > 0.25 then
-                        if not castStopBlacklist[cast.spellName] and (GetUnitSpeed(unitID) ~= 0 or IsFalling(unitID)) then
-                            local castAlmostFinishied = ((currTime - cast.timeStart) > cast.maxValue - 0.1)
-                            -- due to lag its possible that the cast is successfuly casted but still shows interrupted
-                            -- unless we ignore the last few miliseconds here
-                            if not castAlmostFinishied then
-                                if not cast.isChanneled then
-                                    cast.isFailed = true
-                                end
-                                self:DeleteCast(unitGUID, nil, nil, cast.isChanneled)
+        for unitID, castbar in next, activeFrames do
+            if unitID ~= "focus" then
+                local cast = castbar._data
+                -- Only stop cast for players since some mobs runs while casting, also because
+                -- of lag we have to only stop it if the cast has been active for atleast 0.15 sec
+                if cast and cast.isPlayer and currTime - cast.timeStart > 0.15 then
+                    if not castStopBlacklist[cast.spellName] and (GetUnitSpeed(unitID) ~= 0 or IsFalling(unitID)) then
+                        local castAlmostFinishied = ((currTime - cast.timeStart) > cast.maxValue - 0.1)
+                        -- due to lag its possible that the cast is successfuly casted but still shows interrupted
+                        -- unless we ignore the last few miliseconds here
+                        if not castAlmostFinishied then
+                            if not cast.isChanneled then
+                                cast.isFailed = true
                             end
+                            self:DeleteCast(castbar._data.unitGUID, nil, nil, cast.isChanneled)
                         end
                     end
                 end
@@ -747,7 +756,7 @@ addon:SetScript("OnUpdate", function(self, elapsed)
                 castbar.Spark:SetPoint("CENTER", castbar, "LEFT", sparkPosition, 0)
             else
                 -- slightly adjust color of the castbar when its not 100% sure if the cast is casted or failed
-                -- (gotta put it here to run before fadeout anim)
+                -- (gotta put it here to run before fadeout anim but in the future we should move this into Frames.lua)
                 if not cast.isUnknownState and not cast.isCastComplete and not cast.isInterrupted and not cast.isFailed then
                     castbar.Spark:SetAlpha(0)
                     if not cast.isChanneled then

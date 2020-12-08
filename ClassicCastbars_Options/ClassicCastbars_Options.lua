@@ -5,8 +5,6 @@ local TEXT_POINTS = {
     ["CENTER"] = "CENTER",
     ["RIGHT"] = "RIGHT",
     ["LEFT"] = "LEFT",
-    ["TOP"] = "TOP",
-    ["BOTTOM"] = "BOTTOM",
 }
 
 local function GetLSMTable(lsmType)
@@ -36,6 +34,14 @@ local function CreateUnitTabGroup(unitID, localizedUnit, order)
         return not ClassicCastbars.db[unitID].enabled
     end
 
+    local function GetStatusColoredEnableText(unit)
+        if ClassicCastbars.db[unit].enabled then
+            return "|cFF20C000" .. L.TOGGLE_CASTBAR .. "|r"
+        else
+            return "|cFFFF0000" .. L.TOGGLE_CASTBAR .. "|r"
+        end
+    end
+
     return {
         name = format("%s %s", L.CASTBAR, localizedUnit),
         order = order,
@@ -60,7 +66,7 @@ local function CreateUnitTabGroup(unitID, localizedUnit, order)
                     -- or else you have to set a new 'get' and 'set' func
                     enabled = {
                         order = 1,
-                        name = L.TOGGLE_CASTBAR,
+                        name = GetStatusColoredEnableText(unitID),
                         desc = L.TOGGLE_CASTBAR_TOOLTIP,
                         width = "full", -- these have to be full to not truncate text in non-english locales
                         type = "toggle",
@@ -140,9 +146,7 @@ local function CreateUnitTabGroup(unitID, localizedUnit, order)
                     notes = {
                         order = 9,
                         hidden = unitID ~= "focus",
-                        -- this note will soon be removed or changed to only contain slash commands so we dont bother localizing here
-                        name = "\nSlash Commands:\n\n|cffffff00 - /focus\n\n - /clearfocus\n\n - /click FocusCastbar|r\n\n Note that if you switch focus in combat it wont update the targetting until you leave combat. Only the cast tracking will still work in combat.\n"
-                        .. "\n\nExample macro for focus cast:\n |cffffff00/click FocusCastbar\n /cast SpellName\n /targetlasttarget|r\n\nNote that if you somehow fail targetting your focus (i.e out of range) it will use the spell on your current target instead. Sadly nothing can be done about this, so use with caution.",
+                        name = "\n\nSlash Commands:\n\n|cffffff00 - /focus\n\n - /clearfocus\n\n - /click FocusCastbar|r",
                         type = "description",
                     },
                 },
@@ -163,6 +167,7 @@ local function CreateUnitTabGroup(unitID, localizedUnit, order)
                         order = 1,
                         name = L.WIDTH,
                         desc = L.WIDTH_TOOLTIP,
+                        width = 2,
                         type = "range",
                         min = 1,
                         max = 500,
@@ -173,45 +178,12 @@ local function CreateUnitTabGroup(unitID, localizedUnit, order)
                         order = 2,
                         name = L.HEIGHT,
                         desc = L.HEIGHT_TOOLTIP,
+                        width = 2,
                         type = "range",
                         min = 1,
                         max = 200,
                         step = 1,
                         bigStep = 10,
-                    },
-                    castFontSize = {
-                        order = 3,
-                        name = L.FONT_SIZE,
-                        desc = L.FONT_SIZE_TOOLTIP,
-                        type = "range",
-                        width = "double",
-                        min = 1,
-                        max = 50,
-                        bigStep = 1,
-                    },
-                    textPositionX = {
-                        order = 4,
-                        name = L.TEXT_POS_X,
-                        desc = L.POSXY_TOOLTIP,
-                        type = "range",
-                        min = -2000,
-                        max = 2000,
-                        bigStep = 1,
-                    },
-                    textPositionY = {
-                        order = 5,
-                        name = L.TEXT_POS_Y,
-                        desc = L.POSXY_TOOLTIP,
-                        type = "range",
-                        min = -2000,
-                        max = 2000,
-                        bigStep = 1,
-                    },
-                    textPoint = {
-                        order = 6,
-                        name = L.TEXT_POINT,
-                        type = "select",
-                        values = TEXT_POINTS,
                     },
                 },
             },
@@ -292,47 +264,117 @@ local function CreateUnitTabGroup(unitID, localizedUnit, order)
                 end,
 
                 args = {
+                    groupCastBarHeader = {
+                        order = 0,
+                        type = "header",
+                        name = L.CASTBAR_COLORS,
+                    },
                     borderColor = {
                         name = L.BORDER_COLOR,
                         order = 1,
+                        width = 1.2,
                         hasAlpha = true,
                         type = "color",
                     },
                     textColor = {
                         name = L.TEXT_COLOR,
                         order = 2,
-                        hasAlpha = true,
-                        type = "color",
-                    },
-                    statusColor = {
-                        name = L.STATUS_COLOR,
-                        order = 3,
-                        hasAlpha = true,
-                        type = "color",
-                    },
-                    statusColorFailed = {
-                        name = L.STATUS_FAILED_COLOR,
-                        order = 3,
-                        hasAlpha = true,
-                        type = "color",
-                    },
-                    statusColorChannel = {
-                        name = L.STATUS_CHANNEL_COLOR,
-                        order = 4,
+                        width = 1.2,
                         hasAlpha = true,
                         type = "color",
                     },
                     statusBackgroundColor = {
                         name = L.STATUS_BG_COLOR,
+                        order = 3,
+                        width = 1.2,
+                        hasAlpha = true,
+                        type = "color",
+                    },
+                    spacer = {
                         order = 5,
+                        type = "description",
+                        name = "\n\n\n",
+                    },
+                    groupCastFillHeader = {
+                        order = 6,
+                        type = "header",
+                        name = "Cast Fill Colors", -- TODO: localize
+                    },
+                    statusColor = {
+                        name = L.STATUS_COLOR,
+                        order = 7,
+                        width = 1.2,
+                        hasAlpha = true,
+                        type = "color",
+                    },
+                    statusColorFailed = {
+                        name = L.STATUS_FAILED_COLOR,
+                        order = 8,
+                        width = 1.2,
+                        hasAlpha = true,
+                        type = "color",
+                    },
+                    statusColorChannel = {
+                        name = L.STATUS_CHANNEL_COLOR,
+                        order = 9,
+                        width = 1.2,
                         hasAlpha = true,
                         type = "color",
                     },
                     statusColorUninterruptible ={
                         name = L.STATUS_UNINTERRUPTIBLE_COLOR,
-                        order = 6,
+                        order = 10,
+                        width = 1.2,
                         hasAlpha = true,
                         type = "color",
+                    },
+                },
+            },
+
+            ----------------------------------------------------
+            -- Castbar Font Options Tab
+            ----------------------------------------------------
+            fonts = {
+                order = 5,
+                name = "Castbar Text", -- TODO: localize
+                type = "group",
+                inline = false,
+                disabled = ModuleIsDisabled,
+
+                args = {
+                    castFontSize = {
+                        order = 3,
+                        name = L.FONT_SIZE,
+                        desc = L.FONT_SIZE_TOOLTIP,
+                        type = "range",
+                        width = "double",
+                        min = 1,
+                        max = 50,
+                        bigStep = 1,
+                    },
+                    textPositionX = {
+                        order = 4,
+                        name = L.TEXT_POS_X,
+                        desc = L.POSXY_TOOLTIP,
+                        type = "range",
+                        min = -2000,
+                        max = 2000,
+                        bigStep = 1,
+                    },
+                    textPositionY = {
+                        order = 5,
+                        name = L.TEXT_POS_Y,
+                        desc = L.POSXY_TOOLTIP,
+                        type = "range",
+                        min = -2000,
+                        max = 2000,
+                        bigStep = 1,
+                    },
+                    textPoint = {
+                        order = 6,
+                        name = L.TEXT_POINT,
+                        type = "select",
+                        values = TEXT_POINTS,
                     },
                 },
             },
@@ -341,7 +383,7 @@ local function CreateUnitTabGroup(unitID, localizedUnit, order)
             -- Castbar Textures Options Tab
             ----------------------------------------------------
             sharedMedia = {
-                order = 5,
+                order = 6,
                 name = L.CASTBAR_TEXTURE_FONT,
                 type = "group",
                 inline = false,
@@ -366,8 +408,13 @@ local function CreateUnitTabGroup(unitID, localizedUnit, order)
                             ClassicCastbars_TestMode:OnOptionChanged(unitID)
                         end,
                     },
-                    castStatusBar = {
+                    spacer1 = {
                         order = 2,
+                        type = "description",
+                        name = "\n\n",
+                    },
+                    castStatusBar = {
+                        order = 3,
                         width = "double",
                         type = "select",
                         dialogControl = "LSM30_Statusbar",
@@ -382,8 +429,13 @@ local function CreateUnitTabGroup(unitID, localizedUnit, order)
                             ClassicCastbars_TestMode:OnOptionChanged(unitID)
                         end,
                     },
+                    spacer2 = {
+                        order = 4,
+                        type = "description",
+                        name = "\n\n",
+                    },
                     castBorder = {
-                        order = 3,
+                        order = 5,
                         width = "double",
                         type = "select",
                         dialogControl = "LSM30_Border",
@@ -398,19 +450,19 @@ local function CreateUnitTabGroup(unitID, localizedUnit, order)
                             ClassicCastbars_TestMode:OnOptionChanged(unitID)
                         end,
                     },
+                    spacer3 = {
+                        order = 6,
+                        type = "description",
+                        name = "\n\n",
+                    },
                     frameLevel = {
-                        order = 4,
+                        order = 7,
                         name = L.FRAME_LEVEL,
                         desc = L.FRAME_LEVEL_DESC,
                         type = "range",
                         min = 0,
                         max = 99,
                         bigStep = 5,
-                    },
-                    notes = {
-                        order = 5,
-                        type = "description",
-                        name = L.LSM_TEXTURE_NOTE,
                     },
                 },
            },
@@ -433,9 +485,9 @@ local function CreateUnitTabGroup(unitID, localizedUnit, order)
                         disabled = function() return not ClassicCastbars.db[unitID].enabled end,
                         func = function() ClassicCastbars_TestMode:ToggleCastbarMovable(unitID) end,
                     },
-                    notes = {
+                    spacer = {
                         order = 2,
-                        name = unitID == "target" and L.TEST_TARGET_TOOLTIP or unitID == "nameplate" and L.TEST_PLATE_TOOLTIP or "",
+                        name = "\n",
                         type = "description",
                     },
                 },
@@ -459,7 +511,6 @@ local function GetOptionsTable()
 
             resetAllSettings = {
                 order = 6,
-                --width = 2,
                 name = L.RESET_ALL,
                 type = "execute",
                 confirm = function()
@@ -468,9 +519,13 @@ local function GetOptionsTable()
                 func = function()
                     local shouldReloadUI = ClassicCastbars.db.player.enabled
                     -- Reset savedvariables to default
+                    local oldUninterruptibleData = CopyTable(ClassicCastbars.db.npcCastUninterruptibleCache)
                     ClassicCastbarsCharDB = {}
                     ClassicCastbarsDB = CopyTable(ClassicCastbars.defaultConfig)
+                    ClassicCastbarsDB.npcCastUninterruptibleCache = oldUninterruptibleData -- no reason to reset this data
+                    ClassicCastbars.npcCastUninterruptibleCache = ClassicCastbarsDB.npcCastUninterruptibleCache -- update pointer
                     ClassicCastbars.db = ClassicCastbarsDB -- update pointer
+
                     ClassicCastbars_TestMode:OnOptionChanged("target")
                     ClassicCastbars_TestMode:OnOptionChanged("nameplate")
                     ClassicCastbars_TestMode:OnOptionChanged("party")
@@ -483,15 +538,15 @@ local function GetOptionsTable()
                 end,
             },
 
+            -- Character specific savedvariables
             usePerCharacterSettings = {
-                order = 8,
+                order = 7,
                 width = 2,
+                type = "toggle",
                 name = L.PER_CHARACTER,
                 desc = L.PER_CHARACTER_TOOLTIP,
-                type = "toggle",
-                confirm = function()
-                    return L.REQUIRES_RESTART
-                end,
+                confirm = true,
+                confirmText = L.REQUIRES_RESTART,
                 get = function()
                     return ClassicCastbarsCharDB and ClassicCastbarsCharDB.usePerCharacterSettings
                 end,
@@ -518,4 +573,7 @@ SLASH_CLASSICCASTBARS3 = "/classiccastbars"
 SLASH_CLASSICCASTBARS4 = "/classicastbars"
 SlashCmdList["CLASSICCASTBARS"] = function()
     LibStub("AceConfigDialog-3.0"):Open("ClassicCastbars")
+    if LibStub("AceConfigDialog-3.0").OpenFrames["ClassicCastbars"] then
+        LibStub("AceConfigDialog-3.0").OpenFrames["ClassicCastbars"]:SetStatusText("Buy me a coffee: https://paypal.me/castbar")
+    end
 end

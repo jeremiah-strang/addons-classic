@@ -1,27 +1,26 @@
-# [2.17.12](https://github.com/WeakAuras/WeakAuras2/tree/2.17.12) (2020-07-11)
+# [3.1.2](https://github.com/WeakAuras/WeakAuras2/tree/3.1.2) (2020-11-22)
 
-[Full Changelog](https://github.com/WeakAuras/WeakAuras2/compare/2.17.11...2.17.12)
+[Full Changelog](https://github.com/WeakAuras/WeakAuras2/compare/3.1.1...3.1.2)
 
 ## Highlights
 
- - more fixes for threat trigger in classic
-- rename blacklist features
-- add more basic shape textures 
+ bug fixes 
 
 ## Commits
 
-InfusOnWoW (5):
+InfusOnWoW (9):
 
-- Make localization easier
-- Rename Blacklist features
-- Fix WeakAuras.WA_Utf8Sub() if the size is equal to the string length
-- Add more basic shape textures
-- Fix %t with "none" formatter
+- Remove debug code
+- Models: Use more force in PreShowModels
+- Add a Class/Spec trigger
+- Duplicate Aura: Optimize this for big dynamic groups
+- Tweak Off-Screen Arrow
+- Options Thumbnails: Use fallback icon if set
+- Templates: Add Rupture Debuff to Sub Debuffs
+- Format Options: Keep the expand/collapse state separate
+- Information: Fix nil error with multi-selection
 
-mrbuds (4):
+cont1nuity (1):
 
-- fix division per 0 in threat trigger
-- Add "Exact Spell Match" option to "Queued Action" trigger, fixes #2264
-- update build.yml for 1.13.5
-- Use threat value and calculted total threat as value & total (#2262)
+- Adding support for Plater personal resource bar anchoring (#2614)
 

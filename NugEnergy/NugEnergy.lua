@@ -10,6 +10,7 @@ local shouldBeFull = false
 local isFull = true
 local isVertical
 local isClassic = WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+local isShadowlands = select(4,GetBuildInfo()) > 90000
 local GetSpecialization = isClassic and function() end or _G.GetSpecialization
 
 NugEnergy = CreateFrame("StatusBar","NugEnergy",UIParent)
@@ -24,7 +25,7 @@ local LSM = LibStub("LibSharedMedia-3.0")
 LSM:Register("statusbar", "Glamour7", [[Interface\AddOns\NugEnergy\statusbar.tga]])
 LSM:Register("statusbar", "NugEnergyVertical", [[Interface\AddOns\NugEnergy\vstatusbar.tga]])
 
-LSM:Register("font", "Emblem", [[Interface\AddOns\NugEnergy\Emblem.ttf]], GetLocale() ~= "enUS" and 15)
+LSM:Register("font", "OpenSans Bold", [[Interface\AddOns\NugEnergy\OpenSans-Bold.ttf]], GetLocale() ~= "enUS" and 15)
 
 local getStatusbar = function() return LSM:Fetch("statusbar", NugEnergyDB.textureName) end
 local getFont = function() return LSM:Fetch("font", NugEnergyDB.fontName) end
@@ -86,6 +87,7 @@ local defaults = {
     x = 0, y = 0,
     marks = {},
     rage = true,
+    mana = false,
     energy = true,
     mana = false,
     manaPriest = false,
@@ -106,7 +108,7 @@ local defaults = {
     width = 100,
     height = 30,
     normalColor = { 0.9, 0.1, 0.1 }, --1
-    altColor = { .9, 0.1, 0.4 }, -- for dispatch and meta 2
+    altColor = { 0.9, 0.168, 0.43 }, -- for dispatch and meta 2
     maxColor = { 131/255, 0.2, 0.2 }, --max color 3
     lowColor = { 141/255, 31/255, 62/255 }, --low color 4
     twColor = { 0.15, 0.9, 0.4 }, -- tick window color
@@ -119,12 +121,11 @@ local defaults = {
         ["LUNAR_POWER"] = ColorArray(PowerBarColor["LUNAR_POWER"]),
         ["FURY"] = ColorArray(PowerBarColor["FURY"]),
         ["INSANITY"] = ColorArray(PowerBarColor["INSANITY"]),
-        ["PAIN"] = ColorArray(PowerBarColor["PAIN"]),
         ["MAELSTROM"] = ColorArray(PowerBarColor["MAELSTROM"]),
         ["MANA"] = ColorArray(PowerBarColor["MANA"]),
     },
     textureName = "Glamour7",
-    fontName = "Emblem",
+    fontName = "OpenSans Bold",
     fontSize = 25,
     textAlign = "END",
     textOffsetX = 0,
@@ -272,6 +273,15 @@ local IsAnySpellKnown = function (...)
         if IsPlayerSpell(spellID) then return spellID end
     end
 end
+local ManaBarGetPower = function(shineZone, cappedZone, minLimit, throttleText)
+    return function(unit)
+        local p = UnitPower(unit, PowerTypeIndex)
+        local pmax = UnitPowerMax(unit, PowerTypeIndex)
+        local p2 = math.floor(p/pmax*100)
+        return p, p2
+    end
+end
+
 
 local lastEnergyTickTime = GetTime()
 local lastEnergyValue = 0
@@ -433,18 +443,27 @@ function NugEnergy.Initialize(self)
         twEnabled = NugEnergyDB.twEnabled
         shouldBeFull = true
         self:RegisterEvent("UPDATE_STEALTH")
-        self:SetScript("OnUpdate",self.UpdateEnergy)
+        self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
 
         self.SPELLS_CHANGED = function(self)
             local spec = GetSpecialization()
+            self:UnregisterEvent("UNIT_HEALTH")
+            self:UnregisterEvent("UNIT_AURA")
+            self:RegisterEvent("PLAYER_TARGET_CHANGED")
             if spec == 1 and IsPlayerSpell(111240) then --blindside
                 execute_range = 0.30
                 self:RegisterUnitEvent("UNIT_HEALTH", "target")
-                self:RegisterEvent("PLAYER_TARGET_CHANGED")
+                self:UnregisterEvent("UNIT_AURA")
+            elseif spec == 3 then
+                self:RegisterUnitEvent("UNIT_AURA", "player")
+                self:UnregisterEvent("UNIT_HEALTH")
+                self.UNIT_AURA = function(self, event, unit)
+                    execute = ( FindAura("player", 185422, "HELPFUL") ~= nil)
+                    self:UpdateEnergy()
+                end
             else
                 execute_range = nil
                 execute = nil
-                self:UnregisterEvent("UNIT_HEALTH")
                 self:UnregisterEvent("PLAYER_TARGET_CHANGED")
             end
         end
@@ -452,10 +471,12 @@ function NugEnergy.Initialize(self)
         if isClassic and NugEnergyDB.enableClassicTicker then
             GetPower = GetPower_ClassicRogueTicker(nil, 19, 0, false)
             ClassicTickerFrame:Enable()
+            self:SetScript("OnUpdate",self.UpdateEnergy)
             self:UpdateBarEffects() -- Will Disable Smoothing
             NugEnergy.UNIT_MAXPOWER = UNIT_MAXPOWER_ClassicTicker
         else
             GetPower = RageBarGetPower(nil, 5, nil, true)
+            self:SetScript("OnUpdate", nil)
             if ClassicTickerFrame.isEnabled then
                 ClassicTickerFrame:Disable()
                 self:UpdateBarEffects()
@@ -466,7 +487,39 @@ function NugEnergy.Initialize(self)
         end
         self:UNIT_MAXPOWER()
 
+    elseif class == "MAGE" and NugEnergyDB.mana then
+        self:RegisterEvent("SPELLS_CHANGED")
+        self.SPELLS_CHANGED = function(self)
+            if GetSpecialization() == 1 and NugEnergyDB.mana then
+                PowerFilter = "MANA"
+                PowerTypeIndex = Enum.PowerType.Mana
+                GetPower = ManaBarGetPower()
+                self:SetNormalColor()
+                self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
+                self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
+            else
+                self:Disable()
+            end
+            self:UPDATE_STEALTH()
+        end
+        self:SPELLS_CHANGED()
 
+    elseif class == "PALADIN" and NugEnergyDB.mana then
+        self:RegisterEvent("SPELLS_CHANGED")
+        self.SPELLS_CHANGED = function(self)
+            if GetSpecialization() == 1 and NugEnergyDB.mana then
+                PowerFilter = "MANA"
+                PowerTypeIndex = Enum.PowerType.Mana
+                GetPower = ManaBarGetPower()
+                self:SetNormalColor()
+                self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
+                self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
+            else
+                self:Disable()
+            end
+            self:UPDATE_STEALTH()
+        end
+        self:SPELLS_CHANGED()
 
     elseif class == "DRUID" then
         self:RegisterEvent("UNIT_DISPLAYPOWER")
@@ -523,7 +576,7 @@ function NugEnergy.Initialize(self)
                 self:UNIT_MAXPOWER()
                 self:RegisterEvent("PLAYER_REGEN_DISABLED")
                 self:UPDATE_STEALTH()
-                self:SetScript("OnUpdate",self.UpdateEnergy)
+                self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
             elseif newPowerType =="RAGE" and NugEnergyDB.rage then
                 PowerFilter = "RAGE"
                 PowerTypeIndex = Enum.PowerType.Rage
@@ -538,7 +591,6 @@ function NugEnergy.Initialize(self)
                 end
                 GetPower = RageBarGetPower(30, 10, nil, nil)
                 self:RegisterEvent("PLAYER_REGEN_DISABLED")
-                self:SetScript("OnUpdate", nil)
                 self:UNIT_MAXPOWER()
                 self:UPDATE_STEALTH()
             elseif newPowerType =="MANA" and isClassic then
@@ -714,6 +766,15 @@ function NugEnergy:PlaySound()
     PlaySoundFile(sound, NugEnergyDB.soundChannel)
 end
 
+function NugEnergy:Disable()
+    PowerFilter = nil
+    PowerTypeIndex = nil
+    self:UnregisterEvent("UNIT_POWER_UPDATE")
+    self:UnregisterEvent("UNIT_MAXPOWER")
+    self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+    self:Hide()
+end
+
 function NugEnergy.UNIT_HEALTH(self, event, unit)
     if unit ~= "target" then return end
     local uhm = UnitHealthMax(unit)
@@ -758,16 +819,16 @@ local HideTimer = function(self, time)
     local a = pA + (p*rA)
     nen:SetAlpha(a)
     if self.OnUpdateCounter >= fadeAfter + fadeTime then
-        self:SetScript("OnUpdate",nil)
         if nen:GetAlpha() <= 0.03 then
             nen:Hide()
         end
-        nen.hiding = false
+        NugEnergy:StopHiding()
         self.OnUpdateCounter = 0
     end
 end
 function NugEnergy:StartHiding()
-    if (not self.hiding and self:IsVisible())  then
+    self:Show()
+    if (not self.hiding)  then
         fader:SetScript("OnUpdate", HideTimer)
         fader.OnUpdateCounter = 0
         self.hiding = true
@@ -777,6 +838,7 @@ end
 function NugEnergy:StopHiding()
     -- if self.hiding then
         fader:SetScript("OnUpdate", nil)
+        fader.OnUpdateCounter = 0
         self.hiding = false
     -- end
 end
@@ -791,8 +853,8 @@ function NugEnergy.UPDATE_STEALTH(self, event, fromUpdateEnergy)
     then
         self:UNIT_MAXPOWER()
         self:UpdateEnergy()
-        self:SetAlpha(1)
         self:StopHiding()
+        self:SetAlpha(1)
         self:Show()
     elseif doFadeOut and self:IsVisible() and self:GetAlpha() > NugEnergyDB.outOfCombatAlpha and PowerFilter then
         self:StartHiding()
@@ -812,18 +874,18 @@ function NugEnergy.ACTIVE_TALENT_GROUP_CHANGED()
     end
 end
 function NugEnergy.ReconfigureMarks(self)
-    local spec_marks = NugEnergyDB_Character.marks[GetSpecialization() or 0]
-    for at, frame in pairs(NugEnergy.marks) do
-        frame:Hide()
-        table.insert(free_marks, frame)
-        NugEnergy.marks[at] = nil
-        -- print("Hiding", at)
-    end
-    for at in pairs(spec_marks) do
-        -- print("Showing", at)
-        NugEnergy:CreateMark(at)
-    end
-    -- NugEnergy:RealignMarks()
+    -- local spec_marks = NugEnergyDB_Character.marks[GetSpecialization() or 0]
+    -- for at, frame in pairs(NugEnergy.marks) do
+    --     frame:Hide()
+    --     table.insert(free_marks, frame)
+    --     NugEnergy.marks[at] = nil
+    --     -- print("Hiding", at)
+    -- end
+    -- for at in pairs(spec_marks) do
+    --     -- print("Showing", at)
+    --     NugEnergy:CreateMark(at)
+    -- end
+    -- -- NugEnergy:RealignMarks()
 end
 
 
@@ -943,7 +1005,7 @@ function NugEnergy:Resize()
         text:ClearAllPoints()
         local textAlign = NugEnergyDB.textAlign
         if textAlign == "END" then
-            text:SetPoint("TOP", f, "TOP", 0+NugEnergyDB.textOffsetX, -5+NugEnergyDB.textOffsetY)
+            text:SetPoint("TOP", f, "TOP", 0+NugEnergyDB.textOffsetX, 0+NugEnergyDB.textOffsetY)
             text:SetJustifyV("TOP")
         elseif textAlign == "CENTER" then
             text:SetPoint("CENTER", f, "CENTER", 0+NugEnergyDB.textOffsetX, 0+NugEnergyDB.textOffsetY)
@@ -1055,7 +1117,7 @@ function NugEnergy:UpdateFrameBorder()
         backdrop:Show()
 
     elseif borderType == "TOOLTIP" then
-        self.border = self.border or CreateFrame("Frame", nil, self)
+        self.border = self.border or CreateFrame("Frame", nil, self, isShadowlands and "BackdropTemplate")
         local border = self.border
         border:SetPoint("TOPLEFT", -3, 3)
         border:SetPoint("BOTTOMRIGHT", 3, -3)
@@ -1066,7 +1128,7 @@ function NugEnergy:UpdateFrameBorder()
         border:SetBackdropBorderColor(0.55,0.55,0.55)
         border:Show()
     elseif borderType == "STATUSBAR" then
-        self.border = self.border or CreateFrame("Frame", nil, self)
+        self.border = self.border or CreateFrame("Frame", nil, self, isShadowlands and "BackdropTemplate")
         local border = self.border
         border:SetPoint("TOPLEFT", -2, 3)
         border:SetPoint("BOTTOMRIGHT", 2, -3)
@@ -1076,7 +1138,7 @@ function NugEnergy:UpdateFrameBorder()
         border:SetBackdropBorderColor(1,1,1)
         border:Show()
     elseif borderType == "3PX" then
-        self.border = self.border or CreateFrame("Frame", nil, self)
+        self.border = self.border or CreateFrame("Frame", nil, self, isShadowlands and "BackdropTemplate")
         local border = self.border
         border:SetPoint("TOPLEFT", -2, 2)
         border:SetPoint("BOTTOMRIGHT", 2, -2)
@@ -1209,7 +1271,7 @@ function NugEnergy.Create(self)
     -- a1:SetDuration(0.2)
     -- a1:SetOrder(1)
 
-    local at = CreateFrame("Frame", nil, f)
+    local at = CreateFrame("Frame", nil, f, isShadowlands and "BackdropTemplate")
     local border_backdrop = {
         edgeFile = "Interface\\Addons\\NugEnergy\\glow", tileEdge = true, edgeSize = 16,
         -- insets = {left = -16, right = -16, top = -16, bottom = -16},
@@ -1814,6 +1876,20 @@ function NugEnergy:CreateGUI()
                                     NugEnergy:SetNormalColor()
                                 end,
                             },
+                            MANA = {
+                                name = L"Mana",
+                                type = 'color',
+                                order = 10,
+                                width = 0.6,
+                                get = function(info)
+                                    local r,g,b = unpack(NugEnergyDB.powerTypeColors["MANA"])
+                                    return r,g,b
+                                end,
+                                set = function(info, r, g, b)
+                                    NugEnergyDB.powerTypeColors["MANA"] = {r,g,b}
+                                    NugEnergy:SetNormalColor()
+                                end,
+                            },
                         }
                     },
                     fadeGroup = {
@@ -2255,6 +2331,13 @@ function NugEnergy:CreateGUI()
                                 max = 0.5,
                                 step = 0.01,
                                 order = 5,
+                            },
+                            mana = {
+                                name = L"Mana",
+                                type = "toggle",
+                                order = 10,
+                                get = function(info) return NugEnergyDB.mana end,
+                                set = function(info, v) NugEnergy.Commands.mana() end
                             },
                         },
                     },

@@ -39,6 +39,14 @@ local QuestieCleanup = QuestieLoader:ImportModule("Cleanup")
 local QuestieDBCompiler = QuestieLoader:ImportModule("DBCompiler")
 ---@type ZoneDB
 local ZoneDB = QuestieLoader:ImportModule("ZoneDB")
+---@type QuestieCorrections
+local QuestieCorrections = QuestieLoader:ImportModule("QuestieCorrections")
+---@type QuestieMenu
+local QuestieMenu = QuestieLoader:ImportModule("QuestieMenu")
+---@type QuestieAnnounce
+local QuestieAnnounce = QuestieLoader:ImportModule("QuestieAnnounce")
+---@type QuestieCombatQueue
+local QuestieCombatQueue = QuestieLoader:ImportModule("QuestieCombatQueue")
 
 --- LOCAL ---
 --False -> true -> nil
@@ -100,17 +108,32 @@ function QuestieEventHandler:RegisterAllEvents()
     Questie:RegisterEvent("NAME_PLATE_UNIT_ADDED", QuestieNameplate.NameplateCreated)
     Questie:RegisterEvent("NAME_PLATE_UNIT_REMOVED", QuestieNameplate.NameplateDestroyed)
     Questie:RegisterEvent("PLAYER_TARGET_CHANGED", QuestieNameplate.DrawTargetFrame)
+
+    -- dropdown fix
+    Questie:RegisterEvent("CURSOR_UPDATE", function() pcall(LQuestie_CloseDropDownMenus) end)
+
+    -- quest announce
+    Questie:RegisterEvent("CHAT_MSG_LOOT", QuestieAnnounce.ItemLooted)
+
+    -- since icon updates are disabled in instances, we need to reset on P_E_W
+    Questie:RegisterEvent("PLAYER_ENTERING_WORLD", function()
+        if Questie.started then
+            QuestieMap:InitializeQueue()
+            if not IsInInstance() then
+                QuestieQuest:SmoothReset()
+            end
+        end
+    end)
+
 end
 
 
 local function _Hack_prime_log() -- this seems to make it update the data much quicker
-  for i=1, GetNumQuestLogEntries() + 1 do
-    GetQuestLogTitle(i)
-    QuestieQuest:GetRawLeaderBoardDetails(i)
-  end
+    for i=1, GetNumQuestLogEntries() + 1 do
+        GetQuestLogTitle(i)
+        QuestieQuest:GetRawLeaderBoardDetails(i)
+    end
 end
-
-
 
 _PLAYER_LOGIN = function()
 
@@ -128,11 +151,11 @@ _PLAYER_LOGIN = function()
         QuestieMap:InitializeQueue()
         _Hack_prime_log()
         QuestiePlayer:Initialize()
+        QuestieLocale:PostBoot()
         QuestieJourney:Initialize()
         QuestieQuest:Initialize()
         QuestieQuest:GetAllQuestIdsNoObjectives()
-        QuestieQuest:CalculateAvailableQuests()
-        QuestieQuest:DrawAllAvailableQuests()
+        QuestieQuest:CalculateAndDrawAvailableQuestsIterative()
         QuestieNameplate:Initialize()
         Questie:Debug(DEBUG_ELEVATED, "PLAYER_ENTERED_WORLD")
         didPlayerEnterWorld = true
@@ -142,6 +165,31 @@ _PLAYER_LOGIN = function()
         end
         -- Initialize the tracker
         QuestieTracker:Initialize()
+
+        local dateToday = date("%y-%m-%d")
+
+        if Questie.db.char.showAQWarEffortQuests and (Questie.db.char.aqWarningPrintDate == nil or Questie.db.char.aqWarningPrintDate < dateToday) then
+            Questie.db.char.aqWarningPrintDate = dateToday
+            C_Timer.After(2, function()
+                print("|cffff0000-----------------------------|r")
+                Questie:Print("|cffff0000The AQ War Effort quests are shown for you. If your server is done you can hide those quests in the General settings of Questie!|r");
+                print("|cffff0000-----------------------------|r")
+            end)
+        end
+
+        if QuestieEventHandler._needTownsfolkUpdate then -- bad code
+            QuestieEventHandler._needTownsfolkUpdate = nil
+            QuestieCorrections:PopulateTownsfolkPostBoot()
+        end
+
+        QuestieMenu:OnLogin()
+
+        if Questie.db.global.debugEnabled then
+            QuestieLoader:PopulateGlobals()
+        end
+
+        Questie.started = true
+
     end
 
     if QuestieLib:GetAddonVersionString() ~= QuestieConfig.dbCompiledOnVersion or (Questie.db.global.questieLocaleDiff and Questie.db.global.questieLocale or GetLocale()) ~= QuestieConfig.dbCompiledLang then
@@ -149,20 +197,42 @@ _PLAYER_LOGIN = function()
     end
 
     if QuestieConfig.dbIsCompiled then -- todo: check for updates or language change and recompile
+        
+        if not Questie.db.char.townsfolk then
+            -- we havent compiled townsfolk on this character
+            QuestieCorrections:Initialize()
+            QuestieCorrections:PopulateTownsfolk()
+            -- bad code
+            QuestieEventHandler._needTownsfolkUpdate = true
+        else
+            QuestieCorrections:MinimalInit()
+        end
         C_Timer.After(1, stage1)
         C_Timer.After(4, stage2)
     else
+        -- reset townsfolk on all characters before compile
+        for _, char in pairs(QuestieConfig.char) do
+            char.townsfolk = nil
+        end
         Questie.minimapConfigIcon:Hide("Questie") -- prevent opening journey / settings while compiling
+        QuestieCorrections:Initialize()
+        QuestieCorrections:PopulateTownsfolk()
+        QuestieLocale:Initialize()
         C_Timer.After(4, function()
-            QuestieDBCompiler:Compile(function()
-                stage1()
-                stage2()
-                Questie.minimapConfigIcon:Show("Questie")
+            print(QuestieLocale:GetUIString("\124cFFAAEEFFQuestie DB has updated!\124r\124cFFFF6F22 Data is being processed, this may take a few moments and cause some lag..."))
+            QuestieDB.private:DeleteGatheringNodes()
+            QuestieCorrections:PreCompile(function()
+                QuestieDBCompiler:Compile(function()
+                    stage1()
+                    QuestieCorrections:PopulateTownsfolkPostBoot()
+                    stage2()
+                    Questie.minimapConfigIcon:Show("Questie")
+                end)
             end)
         end)
     end
-
 end
+
 
 --Fires when a quest is accepted in anyway.
 _QUEST_ACCEPTED = function(self, questLogIndex, questId)
@@ -219,7 +289,7 @@ end
 
 --- Helper function to remove quests correctly
 ---@param questId QuestId
----@param count integer @The amount of calls already made in recursion
+---@param count number @The amount of calls already made in recursion
 _CompleteQuest = function(questId, count)
     if(not count) then
         count = 1
@@ -243,8 +313,8 @@ end
 --- Fires when a quest is turned in, but before it is remove from the quest log.
 --- We need to save the ID of the finished quest to check it in QR event.
 ---@param questID QuestId
----@param xpReward integer
----@param moneyReward integer
+---@param xpReward number
+---@param moneyReward number
 _QUEST_TURNED_IN = function(self, questID, xpReward, moneyReward)
     Questie:Debug(DEBUG_DEVELOP, "[EVENT] QUEST_TURNED_IN", questID, xpReward, moneyReward)
     _Hack_prime_log()
@@ -254,7 +324,7 @@ _QUEST_TURNED_IN = function(self, questID, xpReward, moneyReward)
     -- Therefore we have to check here to make sure the next QLU updates the state.
     ---@type Quest
     local quest = QuestieDB:GetQuest(questID)
-    if quest and ((quest.parentQuest and quest.IsRepeatable) or quest.Description == nil) then
+    if quest and ((quest.parentQuest and quest.IsRepeatable) or quest.Description == nil or table.getn(quest.Description) == 0) then
         Questie:Debug(DEBUG_DEVELOP, "Enabling shouldRunQLU")
         shouldRunQLU = true
     end
@@ -269,7 +339,10 @@ _QUEST_LOG_UPDATE = function()
         C_Timer.After(1, function ()
             Questie:Debug(DEBUG_DEVELOP, "---> Player entered world, DONE.")
             QuestieQuest:GetAllQuestIds()
-            QuestieTracker:Update()
+            QuestieCombatQueue:Queue(function()
+                QuestieTracker:ResetLinesForChange()
+                QuestieTracker:Update()
+            end)
             _GROUP_JOINED()
         end)
         didPlayerEnterWorld = nil
@@ -299,10 +372,10 @@ _UNIT_QUEST_LOG_CHANGED = function(self, unitTarget)
 end
 
 --- Fires when the player levels up
----@param level integer
----@param hitpoints integer
----@param manapoints integer
----@param talentpoints integer
+---@param level number
+---@param hitpoints number
+---@param manapoints number
+---@param talentpoints number
 _PLAYER_LEVEL_UP = function(self, level, hitpoints, manapoints, talentpoints, ...)
     Questie:Debug(DEBUG_DEVELOP, "[EVENT] PLAYER_LEVEL_UP", level)
 
@@ -312,8 +385,7 @@ _PLAYER_LEVEL_UP = function(self, level, hitpoints, manapoints, talentpoints, ..
     C_Timer.After(3, function()
         QuestiePlayer:SetPlayerLevel(level)
 
-        QuestieQuest:CalculateAvailableQuests()
-        QuestieQuest:DrawAllAvailableQuests()
+        QuestieQuest:CalculateAndDrawAvailableQuestsIterative()
     end)
     QuestieJourney:PlayerLevelUp(level)
 end
@@ -330,7 +402,9 @@ _MODIFIER_STATE_CHANGED = function(self, key, down)
     end
     if Questie.db.global.trackerLocked then
         if QuestieTracker.private.baseFrame ~= nil then
-            QuestieTracker.private.baseFrame:Update()
+            QuestieCombatQueue:Queue(function()
+                QuestieTracker.private.baseFrame:Update()
+            end)
         end
     end
 end
@@ -341,8 +415,7 @@ _CHAT_MSG_SKILL = function()
     local isProfUpdate = QuestieProfessions:Update()
     -- This needs to be done to draw new quests that just came available
     if isProfUpdate then
-        QuestieQuest:CalculateAvailableQuests()
-        QuestieQuest:DrawAllAvailableQuests()
+        QuestieQuest:CalculateAndDrawAvailableQuestsIterative()
     end
 end
 
@@ -351,9 +424,11 @@ _CHAT_MSG_COMBAT_FACTION_CHANGE = function()
     Questie:Debug(DEBUG_DEVELOP, "CHAT_MSG_COMBAT_FACTION_CHANGE")
     local factionChanged = QuestieReputation:Update(false)
     if factionChanged then
-        QuestieTracker:Update()
-        QuestieQuest:CalculateAvailableQuests()
-        QuestieQuest:DrawAllAvailableQuests()
+        QuestieCombatQueue:Queue(function()
+            QuestieTracker:ResetLinesForChange()
+            QuestieTracker:Update()
+        end)
+        QuestieQuest:CalculateAndDrawAvailableQuestsIterative()
     end
 end
 

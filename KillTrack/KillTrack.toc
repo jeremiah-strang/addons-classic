@@ -1,5 +1,5 @@
-## Interface: 11302
-## Version: v1.13.0
+## Interface: 11305
+## Version: v2.17.0
 ## Title: KillTrack
 ## Notes: Keeps track of how many kills you have per mob and displays them in a list.
 ## Author: F16Gaming
@@ -21,7 +21,6 @@ Command.lua
 MobList.lua
 Timer.lua
 TimerFrame.lua
-TimerFrame.xml
 ImmediateFrame.lua
 ExpTracker.lua
 Broker.lua

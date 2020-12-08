@@ -283,6 +283,9 @@ L = DBM:GetModLocalization("PyroguardEmberseer")
 L:SetGeneralLocalization{
 	name 		= "Пиростраж Углевзор"
 }
+L:SetMiscLocalization{
+	Pull		= "%s начинает восстанавливать прежнюю силу!"
+}
 -----------------------------
 --  Solakar Flamewreath  --
 -----------------------------
@@ -519,6 +522,9 @@ L = DBM:GetModLocalization(416)
 
 L:SetGeneralLocalization{
 	name 		= "Чо'Раш Наблюдатель"
+}
+L:SetMiscLocalization{
+    Defeat	= "Король мертв – О НЕТ! Зови Миззла Хитрюгу! Он знает, что делать!"
 }
 ----------------
 -- King Gordok --
@@ -1237,7 +1243,12 @@ L = DBM:GetModLocalization(455)
 L:SetGeneralLocalization{
 	name 		= "Рамштайн Ненасытный"
 }
-
+L:SetTimerLocalization{
+	TimerGuards	= "Появление Караульных"
+}
+L:SetOptionLocalization{
+	TimerGuards	= "Показывать таймер до прибытия Караульных Черной Стражи после победы над боссом"
+}
 -----------------------------
 --  Baron Rivendare  --
 -----------------------------

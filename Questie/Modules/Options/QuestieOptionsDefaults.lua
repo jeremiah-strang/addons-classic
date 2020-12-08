@@ -119,6 +119,8 @@ function QuestieOptionsDefaults:Load()
             showDungeonQuests = true,
             showRaidQuests = true,
             showPvPQuests = true,
+            showAQWarEffortQuests = false,
+            showQuestsInNpcTooltip = true
         },
         profile = {minimap = {hide = false}}
     }

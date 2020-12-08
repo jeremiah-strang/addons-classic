@@ -525,6 +525,10 @@ L = DBM:GetModLocalization(416)
 L:SetGeneralLocalization{
 	name 		= "정찰병 초루쉬"
 }
+
+L:SetMiscLocalization{
+    Defeat	= "왕이 죽었다. 오, 이제 어쩌지! 약삭빠른 미즐을 불러와! 그가 다음에 어떻게 해야 하는지 알고 있다!"
+}
 -----------------------------
 --  King Gordok  --
 -----------------------------
@@ -1242,6 +1246,12 @@ L = DBM:GetModLocalization(455)
 
 L:SetGeneralLocalization{
 	name 		= "먹보 람스타인"
+}
+L:SetTimerLocalization{
+	TimerGuards	= "보초병 등장"
+}
+L:SetOptionLocalization{
+	TimerGuards	= "보스를 쓰러트리면 검은호위대 보초병 등장 타이머 바 표시"
 }
 
 -----------------------------

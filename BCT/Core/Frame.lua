@@ -76,7 +76,7 @@ BCT.Anchor:SetBackdropColor(0,0,0,1)
 
 BCT.Anchor:SetScript("OnUpdate", function(self) 
 
-	if not TradeFrame:IsVisible() then
+	if not TradeFrame:IsVisible() and not InboxFrame:IsVisible() then
 		if GetMouseFocus() ~= nil and BCT.session.db.window.body.mouseover then
 			if GetMouseFocus():GetName() == "BCTAnchor" then
 				BCT.Window:Show()
@@ -103,6 +103,45 @@ BCT.Anchor:SetScript("OnUpdate", function(self)
 	self.text:SetText(title)
 end)
 
+local function UpdateAnchorPoints()
+	local point, relativeTo, relativePoint, xOfs, yOfs = BCT.Anchor:GetPoint()
+
+	local wasDisabled =
+		(BCT.session.db.window.anchor.point ~= "CENTER" or
+		BCT.session.db.window.anchor.relativeTo ~= nil or
+		BCT.session.db.window.anchor.relativePoint ~= "CENTER" or
+		BCT.session.db.window.anchor.xOfs ~= 0 or
+		BCT.session.db.window.anchor.yOfs ~= 0)
+
+	local inDefaultPosition =
+		(point == "CENTER" and
+		relativeTo == UIParent and
+		relativePoint == "CENTER" and
+		tonumber(xOfs) == 0 and
+		tonumber(yOfs) == 0)
+
+	if not inDefaultPosition then
+		BCT.session.db.window.anchor.point = point
+		BCT.session.db.window.anchor.relativeTo = relativeTo
+		BCT.session.db.window.anchor.relativePoint = relativePoint
+		BCT.session.db.window.anchor.xOfs = tonumber(xOfs)
+		BCT.session.db.window.anchor.yOfs = tonumber(yOfs)
+	end
+
+	if inDefaultPosition and wasDisabled then
+		BCT.Anchor:ClearAllPoints()
+		BCT.Anchor:SetPoint(
+			BCT.session.db.window.anchor.point, 
+			BCT.session.db.window.anchor.relativeTo, 
+			BCT.session.db.window.anchor.relativePoint,
+			BCT.session.db.window.anchor.xOfs, 
+			BCT.session.db.window.anchor.yOfs
+		)
+		BCT.Anchor:SetUserPlaced(true)
+	end
+
+end
+
 BCT.Window = CreateFrame("Frame","BCTTxtFrame",UIParent)
 BCT.Window:SetWidth(200)
 BCT.Window:SetHeight(35)
@@ -119,9 +158,15 @@ local StringBuildTicker = C_Timer.NewTicker(0.1, function()
 	BCT.BuildEnchantString()
 	BCT.BuildTrackedString()
 	BCT.BuildNextFiveString()
+	UpdateAnchorPoints()
 end)
 
 BCT.Window:SetScript("OnUpdate", function(self) 
+
+	if BCT.session.db.window.text == nil then
+		self.text:SetText("Something is wrong (ace)")
+		return
+	end
 
 	local enchantsLine = (BCT.session.db.window.text["enchants"] and "ENCHANTS: " .. BCT.enchantsStr .. "/" .. BCT.enchantsTotal .. "\n" or "")
 	local buffsLine = (BCT.session.db.window.text["buffs"] and "BUFFS: " .. BCT.buffStr .. "/" .. BCT.aurasMax .. "\n" or "")
@@ -139,30 +184,3 @@ BCT.Window:SetScript("OnUpdate", function(self)
 	
 	self.text:SetText(txt)
 end)
-
---[[
-BCT.Tester = CreateFrame("Frame","BCTTester",UIParent)
-BCT.Tester:SetMovable(true)
-BCT.Tester:EnableMouse(true)
-BCT.Tester:RegisterForDrag("LeftButton")
-BCT.Tester:SetWidth(200)
-BCT.Tester:SetHeight(35)
-BCT.Tester:SetAlpha(1.)
-BCT.Tester:SetPoint("CENTER",0,0)
-BCT.Tester.text = BCT.Tester:CreateFontString(nil,"ARTWORK") 
-BCT.Tester.text:SetFont(SM:Fetch("font","Expressway"), 13, "OUTLINE")
-BCT.Tester.text:SetPoint("LEFT", BCT.Tester, "LEFT", -800, 0)
-BCT.Tester.text:SetJustifyH("LEFT")
-BCT.Tester.text:SetText("BUFF CAP TRACKER")
-BCT.Tester:SetUserPlaced(true)
-
-BCT.Tester:SetScript("OnUpdate", function(self) 
-	local txt = ""
-	for k,v in pairs(BCT.session.state.raid) do
-		if v[1] then
-			txt = txt .. k .. ": " .. v[1] .. "\n"
-		end
-	end
-	self.text:SetText(txt)
-end)
---]]

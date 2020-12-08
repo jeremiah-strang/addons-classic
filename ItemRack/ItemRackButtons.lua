@@ -42,6 +42,10 @@ function ItemRack.InitButtons()
 --		button:SetAttribute("alt-slot*",ATTRIBUTE_NOOP)
 --		button:SetAttribute("shift-slot*",ATTRIBUTE_NOOP)
 		ItemRack.MenuMouseoverFrames["ItemRackButton"..i]=1
+
+		if ItemRack.MasqueGroups and ItemRack.MasqueGroups[1] then
+			ItemRack.MasqueGroups[1]:AddButton(button)
+		end
 	end
 
 	ItemRack.CreateTimer("ButtonsDocking",ItemRack.ButtonsDocking,.2,1) -- (repeat) on while buttons docking
@@ -488,7 +492,7 @@ function ItemRack.ButtonPostClick(self,button)
 			ItemRackMenuFrame:Hide()
 		else
 			ItemRack.DockMenuToButton(id)
-			ItemRack.BuildMenu(id)
+			ItemRack.BuildMenu(id, nil, 2)
 		end
 	elseif IsShiftKeyDown() then
 		if id<20 then
@@ -500,15 +504,15 @@ function ItemRack.ButtonPostClick(self,button)
 		end
 	elseif IsAltKeyDown() then
 		if id<20 and ItemRackSettings.DisableAltClick=="OFF" then
-			if not ItemRackUser.Queues[id] then
+			if not ItemRack.GetQueues()[id] then
 				LoadAddOn("ItemRackOptions")
 				ItemRackOptFrame:Show()
 				ItemRackOpt.TabOnClick(self,4)
 				ItemRackOpt.SetupQueue(id)
 			end
-			ItemRackUser.QueuesEnabled[id] = not ItemRackUser.QueuesEnabled[id]
+			ItemRack.GetQueuesEnabled()[id] = not ItemRack.GetQueuesEnabled()[id]
 			if ItemRackOptSubFrame7 and ItemRackOptSubFrame7:IsVisible() and ItemRackOpt.SelectedSlot==id then
-				ItemRackOptQueueEnable:SetChecked(ItemRackUser.QueuesEnabled[id])
+				ItemRackOptQueueEnable:SetChecked(ItemRack.GetQueuesEnabled()[id])
 			end
 			ItemRack.UpdateCombatQueue()
 		elseif id==20 then

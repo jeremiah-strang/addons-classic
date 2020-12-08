@@ -1,33 +1,14 @@
-SLASH_BUFFTIMERS1 = "/bufftimers"
-SLASH_BUFFTIMERS2 = "/bt"
-
-local function commandMessage(msg, msg2)
-    DEFAULT_CHAT_FRAME:AddMessage("|caaaaaaaa" .. msg .. "|r" .. " " .. msg2)
-end
-
-SlashCmdList["BUFFTIMERS"] = function(msg)
-    msg = string.lower(msg)
-
-    if msg == "" then
-        DEFAULT_CHAT_FRAME:AddMessage("These are the commands available to the BuffTimers addon:")
-        commandMessage("seconds", "Toggle to show/hide the seconds in the buff time")
-    elseif msg == "seconds" then
-        BuffTimersOptions["seconds"] = not BuffTimersOptions["seconds"]
-
-        if (BuffTimersOptions["seconds"]) then
-            DEFAULT_CHAT_FRAME:AddMessage("BuffTimers: enabled buffs to display seconds.")
-        else
-            DEFAULT_CHAT_FRAME:AddMessage("BuffTimers: disabled buffs to display seconds.")
-        end
-    end
-end
-
 local function formatTime(time)
     local isSecondsOption = BuffTimersOptions["seconds"]
-    local seconds = floor(mod(time, 60))
+    local seconds = floor(time % 60)
     local minutes = floor(time / 60)
+    local milliseconds = 0
 
-    if not isSecondsOption then
+    if minutes == 0 and seconds < 5 then
+        milliseconds = floor((time % 60) % 1 * 10)
+    end
+
+    if not isSecondsOption or minutes >= BuffTimersOptions["seconds_threshold"] then
         minutes = ceil(time / 60)
     else
         -- Prefix seconds with a zero
@@ -36,26 +17,37 @@ local function formatTime(time)
         end
     end
 
-    if isSecondsOption then
+    local secondsStr = seconds .. "s"
+
+    if minutes < 1 and floor(time % 60) < 5 and BuffTimersOptions["milliseconds"] then
+        secondsStr = seconds .. "." .. milliseconds .. "s"
+    end
+
+    if isSecondsOption and minutes < BuffTimersOptions["seconds_threshold"] then
         if minutes >= 1 then
             return minutes .. ":" .. seconds
         else
-            return seconds .. "s"
+            return secondsStr
         end
     else
         if minutes > 1 then
             return minutes .. "m"
         else
-            return seconds .. "s"
+            return secondsStr
         end
     end
 end
 
 local function onAuraDurationUpdate(aura, time)   
-    local duration = getglobal(aura:GetName().."Duration")
+    local duration = getglobal(aura:GetName() .. "Duration")
     
     if (time) then
         duration:SetText(formatTime(time))
+
+        if BuffTimersOptions["yellow_text"] then
+            duration:SetTextColor(0.99999779462814, 0.81960606575012, 0)
+        end
+
         duration:Show()
     else
         duration:Hide()
@@ -63,9 +55,9 @@ local function onAuraDurationUpdate(aura, time)
 end
 
 local function onAuraUpdate(auraSlot, index, filter)
-    local auraName = auraSlot..index
+    local auraName = auraSlot .. index
     local aura = getglobal(auraName)
-    local auraDuration = getglobal(auraName.."Duration")
+    local auraDuration = getglobal(auraName .. "Duration")
     
     if not auraDuration then
         return
@@ -85,18 +77,3 @@ hooksecurefunc("AuraButton_Update", onAuraUpdate)
 
 -- Aura duration update event
 hooksecurefunc("AuraButton_UpdateDuration", onAuraDurationUpdate)
-
--- Addon load event
-local frame = CreateFrame("FRAME")
-frame:RegisterEvent("ADDON_LOADED")
-
-function frame:OnEvent(event, arg1)
-    if event == "ADDON_LOADED" and arg1 == "BuffTimers" then
-        if (not BuffTimersOptions) then
-            BuffTimersOptions = {}
-            BuffTimersOptions["seconds"] = true
-        end
-    end
-end
-
-frame:SetScript("OnEvent", frame.OnEvent)

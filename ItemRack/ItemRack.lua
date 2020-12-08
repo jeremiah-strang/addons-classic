@@ -2,7 +2,7 @@ ItemRack = {}
 
 local _
 
-ItemRack.Version = "3.45"
+ItemRack.Version = "3.52"
 
 ItemRackUser = {
 	Sets = {}, -- user's sets
@@ -13,6 +13,7 @@ ItemRackUser = {
 	Locked = "OFF", -- buttons locked
 	EnableEvents = "ON", -- whether all events enabled
 	EnableQueues = "ON", -- whether all auto queues enabled
+	EnablePerSetQueues = "OFF",
 	ButtonSpacing = 4, -- padding between docked buttons
 	Alpha = 1, -- alpha of buttons
 	MainScale = 1, -- scale of the dockable buttons
@@ -151,6 +152,17 @@ end
 
 ItemRack.EventHandlers = {}
 ItemRack.ExternalEventHandlers = {}
+
+do
+	local Masque = LibStub("Masque", true) or (LibMasque and LibMasque("Button"))
+	if Masque then
+		ItemRack.MasqueGroups = {}
+		ItemRack.MasqueGroups[1] = Masque:Group("ItemRack", "On screen panels")
+		ItemRack.MasqueGroups[2] = Masque:Group("ItemRack", "On screen menus")
+		ItemRack.MasqueGroups[3] = Masque:Group("ItemRack", "Character info menus")
+		ItemRack.MasqueGroups[4] = Masque:Group("ItemRack", "Map icon menu")
+	end
+end
 
 function ItemRack.OnEvent(self,event,...)
 	ItemRack.EventHandlers[event](self,event,...)
@@ -928,7 +940,7 @@ end
 -- id = 0-19 for inventory slots, or 20 for set, or nil for last defined slot/set menu (ItemRack.menuOpen)
 -- before calling ItemRack.BuildMenu, you should call ItemRack.DockWindows
 -- if menuInclude, then also include the worn item(s) in the menu
-function ItemRack.BuildMenu(id,menuInclude)
+function ItemRack.BuildMenu(id,menuInclude,masqueGroup)
 	if id then
 		ItemRack.menuOpen = id
 		ItemRack.menuInclude = menuInclude
@@ -1020,6 +1032,17 @@ function ItemRack.BuildMenu(id,menuInclude)
 			button = ItemRack.CreateMenuButton(i,ItemRack.Menu[i]) or ItemRackButtonMenu
 			button:SetPoint("TOPLEFT",ItemRackMenuFrame,ItemRack.menuDock,xpos,ypos)
 			button:SetFrameLevel(ItemRackMenuFrame:GetFrameLevel()+1)
+
+			if ItemRack.MasqueGroups then
+				for _, group in pairs(ItemRack.MasqueGroups) do
+					group:RemoveButton(button)
+				end
+
+				if ItemRack.MasqueGroups[masqueGroup] then
+					ItemRack.MasqueGroups[masqueGroup]:AddButton(button)
+				end
+			end
+
 			if ItemRack.menuOrient=="VERTICAL" then
 				xpos = xpos + ItemRack.DockInfo[ItemRack.currentDock].xdir*40
 				col = col + 1
@@ -1386,7 +1409,7 @@ function ItemRack.UpdateCombatQueue()
 			queue:SetTexture(select(2,ItemRack.GetInfoByID(ItemRack.CombatQueue[i])))
 			queue:SetAlpha(1)
 			queue:Show()
-		elseif ItemRackUser.QueuesEnabled[i] then
+		elseif ItemRack.GetQueuesEnabled()[i] then
 			queue:SetTexture("Interface\\AddOns\\ItemRack\\ItemRackGear")
 			queue:SetAlpha(ItemRackUser.EnableQueues=="ON" and 1 or .5)
 			queue:Show()
@@ -1684,7 +1707,7 @@ function ItemRack.DockMenuToCharacterSheet(self)
 			end
 			ItemRack.DockWindows("TOPLEFT",self,"TOPRIGHT","HORIZONTAL")
 		end
-		ItemRack.BuildMenu(slot)
+		ItemRack.BuildMenu(slot, nil, 3)
 	end
 end
 
@@ -1739,7 +1762,7 @@ function ItemRack.MinimapOnClick(self,button)
 			else
 				ItemRack.DockWindows("BOTTOMRIGHT",ItemRackMinimapFrame,"TOPRIGHT","VERTICAL")
 			end
-			ItemRack.BuildMenu(20)
+			ItemRack.BuildMenu(20, nil, 4)
 		end
 	else
 		ItemRack.ToggleOptions(self)
@@ -1887,26 +1910,31 @@ end
 --[[ Key bindings ]]
 
 function ItemRack.SetSetBindings()
-	local buttonName,button
-	for i in pairs(ItemRackUser.Sets) do
-		if ItemRackUser.Sets[i].key then
-			buttonName = "ItemRack"..UnitName("player")..GetRealmName()..i
-			button = _G[buttonName] or CreateFrame("Button",buttonName,nil,"SecureActionButtonTemplate")
-			button:SetAttribute("type","macro")
-			local macrotext = "/script ItemRack.RunSetBinding(\""..i.."\")\n"
-			for slot = 16, 18 do
-				if ItemRackUser.Sets[i].equip[slot] then
-					local name,_,_,_,_,_,_,_,_,_ = GetItemInfo("item:"..ItemRackUser.Sets[i].equip[slot])
-					if name then
-						macrotext = macrotext .. "/equipslot [combat]" .. slot .. " " .. name .. "\n";
+	local inLockdown = InCombatLockdown()
+	if not inLockdown then
+		local buttonName,button
+		for i in pairs(ItemRackUser.Sets) do
+			if ItemRackUser.Sets[i].key then
+				buttonName = "ItemRack"..UnitName("player")..GetRealmName()..i
+				button = _G[buttonName] or CreateFrame("Button",buttonName,nil,"SecureActionButtonTemplate")
+				button:SetAttribute("type","macro")
+				local macrotext = "/script ItemRack.RunSetBinding(\""..i.."\")\n"
+				for slot = 16, 18 do
+					if ItemRackUser.Sets[i].equip[slot] then
+						local name,_,_,_,_,_,_,_,_,_ = GetItemInfo("item:"..ItemRackUser.Sets[i].equip[slot])
+						if name then
+							macrotext = macrotext .. "/equipslot [combat]" .. slot .. " " .. name .. "\n";
+						end
 					end
 				end
+				button:SetAttribute("macrotext",macrotext)
+				SetBindingClick(ItemRackUser.Sets[i].key,buttonName)
 			end
-			button:SetAttribute("macrotext",macrotext)
-			SetBindingClick(ItemRackUser.Sets[i].key,buttonName)
 		end
+		AttemptToSaveBindings(GetCurrentBindingSet())
+	else
+		ItemRack.Print("Cannot save hotkeys in combat, please try again out of combat!")
 	end
-	AttemptToSaveBindings(GetCurrentBindingSet())
 end
 
 function ItemRack.RunSetBinding(setname)
@@ -2068,5 +2096,39 @@ function ItemRack.ProfileFuncs()
 			info = info..t[i].."\n"
 		end
 		table.insert(TinyPadPages,info)
+	end
+end
+
+-- returns Queues for the current set if EnablePerSetQueues is enabled, otherwise the global Queues
+function ItemRack.GetQueues()
+	if ItemRackUser.EnablePerSetQueues == "ON" then
+		if not (ItemRackUser.CurrentSet and ItemRackUser.Sets[ItemRackUser.CurrentSet]) then
+			return ItemRackUser.Queues
+		end
+		
+		local currentSet = ItemRackUser.Sets[ItemRackUser.CurrentSet]
+		if not currentSet.Queues then
+			currentSet.Queues = {}
+		end
+		return currentSet.Queues
+	else
+		return ItemRackUser.Queues
+	end
+end
+
+-- returns QueuesEnabled for the current set if EnablePerSetQueues is enabled, otherwise the global QueuesEnabled
+function ItemRack.GetQueuesEnabled()
+	if ItemRackUser.EnablePerSetQueues == "ON" then
+		if not (ItemRackUser.CurrentSet and ItemRackUser.Sets[ItemRackUser.CurrentSet]) then
+			return ItemRackUser.QueuesEnabled
+		end
+		
+		local currentSet = ItemRackUser.Sets[ItemRackUser.CurrentSet]
+		if not currentSet.QueuesEnabled then
+			currentSet.QueuesEnabled = {}
+		end
+		return currentSet.QueuesEnabled
+	else
+		return ItemRackUser.QueuesEnabled
 	end
 end

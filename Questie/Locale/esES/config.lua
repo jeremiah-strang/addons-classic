@@ -1,9 +1,11 @@
 QuestieLocale.locale['esES'] = {
-    -- Config Windows
+    -- General tab
     ['GENERAL_TAB'] = "Opciones",
     ['GENERAL_OPTIONS_HEADER'] = "Opciones de Questie",
     ['ENABLE_ICONS'] = "Habilitar Iconos",
     ['ENABLE_ICONS_DESC'] = "Habilitar iconos de Questie",
+    ['TRACKING_ICONS_BUTTON'] = "Config Tracking Icons",
+    ['TRACKING_ICONS_BUTTON_DESC'] = "Allows to select which the tracking icons (like Mailbox, Repair-NPCs) to show on the map and minimap.",
     ['ENABLE_MINIMAP_BUTTON'] = "Habilitar icono del minimapa",
     ['ENABLE_MINIMAP_BUTTON_DESC'] = "Habilita o deshabilita el icono del minimapa. Puedes seguir accediendo al menú de opciones con /questie",
     ['ENABLE_INSTANT'] = "Habilitar el texto automático de misiones",
@@ -31,10 +33,6 @@ QuestieLocale.locale['esES'] = {
     ['ENABLE_TURNINS_DESC'] = "Cuando está habilitado los iconos de misión completada apareceran en el mapa y minimapa",
     ['ENABLE_AVAILABLE'] = "Habilitar iconos de misión disponible",
     ['ENABLE_AVAILABLE_DESC'] = "Cuando está habilitado los iconos de misión disponible apareceran en el mapa y minimapa",
-    ['ENABLE_TOOLTIPS'] = "Habilitar descripción emergente",
-    ['ENABLE_TOOLTIPS_DESC'] = "Cuando está habilitado la información de la mision aparecera en la descripcion de los monstruos/objetos relevantes",
-    ['ENABLE_TOOLTIPS_QUEST_LEVEL'] = "Mostrar nivel de misión en tooltips",
-    ['ENABLE_TOOLTIPS_QUEST_LEVEL_DESC'] = "Si está marcado, el nivel de misiones mostrará en los tooltips.",
     ['ICON_TYPE_HEADER'] = "Tipos de icono",
     ['ENABLE_MAP_ICONS'] = "Habilitar iconos en el mapa",
     ['ENABLE_MAP_ICONS_DESC'] = "Mostrar/Esconder todos los iconos del mapa principal",
@@ -58,6 +56,8 @@ QuestieLocale.locale['esES'] = {
     ['ENABLE_DUNGEON_RAID_ICONS_DESC'] = "Si está marcado, la localización de misiones de bandas mostrará en el mapa y minimapa.",
     ['ENABLE_PVP_QUEST_ICONS'] = "Habilitar iconos de misiones de JcJ",
     ['ENABLE_PVP_QUEST_ICONS_DESC'] = "Si está marcado, la localización de misiones de JcJ mostrará en el mapa y minimapa.",
+    ['ENABLE_AQ_QUEST_ICONS'] = "Habilitar iconos de misiones de la Guerra de Ahn'Qiraj",
+    ['ENABLE_AQ_QUEST_ICONS_DESC'] = "Si está habilitado, las localizaciones de las misiones de la Guerra de Ahn'Qiraj mostrarán en el mapa/minimapa.",
     ['ENABLE_AUTO_ACCEPT_QUESTS'] = "Aceptar misiones automáticamente",
     ['ENABLE_AUTO_ACCEPT_QUESTS_DESC'] = "Habilita o deshabilita aceptar misiones automáticamente.",
     ['ENABLE_AUTO_COMPLETE'] = "Completar misiones automáticamente",
@@ -66,7 +66,9 @@ QuestieLocale.locale['esES'] = {
     ['ENABLE_ACCEPT_TRIVIAL_DESC'] = "Si está habilitado, las misiones triviales (grises) también se aceptarán automáticamente.",
     ['AUTO_MODIFIER'] = "Auto modificador",
     ['AUTO_MODIFIER_DESC'] = "El modificador para NO aceptar/completar automáticamente las misiones cuando cualquiera de las opciones está habilitada e interactúas con un asignador de misión.",
-
+    ['ENABLE_YELL'] = "Compartir el progreso de la misión con jugadores cercanos",
+    ['ENABLE_YELL_DESC'] = "El progreso de tu misión se enviará periódicamente a los jugadores cercanos.",
+    
     -- Minimap tab
     ['MINIMAP_TAB'] = "Opciones de minimapa",
     ['MINIMAP_OPTIONS_HEADER'] = "Opciones de las notas del minimapa",
@@ -89,6 +91,7 @@ QuestieLocale.locale['esES'] = {
 
     -- Map tab
     ['MAP_TAB'] = "Opciones de mapa",
+    ['MAP_OPTIONS_HEADER'] = "Opciones de mapa",
     ['ENABLE_MAP_BUTTON'] = "Mostrar el botón de Questie en el mapa",
     ['ENABLE_MAP_BUTTON_DESC'] = "Habilita o deshabilita el botón de mostrar/ocultar Questie en el mapa (Puede solucionar algunas interacciones con Addons de mapas)",
     ['MAP_NOTES'] = "Opciones de las notas de mapa",
@@ -164,6 +167,18 @@ QuestieLocale.locale['esES'] = {
     ['TARGET_RESET_BTN'] = "Reiniciar marco de objetivo",
     ['TARGET_RESET_BTN_DESC'] = "Reinicia a valores por defecto el tamaño y la posición del marco de objetivo",
 
+    -- Tooltip tab
+    ['TOOLTIP_TAB'] = "Descripción emergente",
+    ['TOOLTIP_OPTIONS_HEADER'] = "Opciones de descripción emergente",
+    ['ENABLE_TOOLTIPS'] = "Habilitar descripción emergente",
+    ['ENABLE_TOOLTIPS_DESC'] = "Cuando está habilitado la información de la mision aparecera en la descripcion de los monstruos/objetos relevantes",
+    ['ENABLE_TOOLTIPS_QUEST_LEVEL'] = "Mostrar nivel de misión en tooltips",
+    ['ENABLE_TOOLTIPS_QUEST_LEVEL_DESC'] = "Si está marcado, el nivel de misiones mostrará en los tooltips.",
+    ['SHARED_TOOLTIP_PARTY_ONLY'] = "Fiesta compartida solo",
+    ['SHARED_TOOLTIP_PARTY_ONLY_DESC'] = "Cuando esto está habilitado, la información de misiones compartidas solo se mostrará si son de miembros del grupo.",
+    ['SHOW_QUESTS_IN_NPC_TOOLTIPS'] = 'Show quests in NPC tooltips',
+    ['SHOW_QUESTS_IN_NPC_TOOLTIPS_DESC'] = 'Show quests (available/complete) in the NPC tooltips.',
+
     -- Advanced tab
     ['ADVANCED_TAB'] = "Avanzado",
     ['ADVANCED_OPTIONS_HEADER'] = "Configuración avanzada",
@@ -183,6 +198,8 @@ QuestieLocale.locale['esES'] = {
     ['RESET_QUESTIE_BTN_DESC'] = "Reinicia Questie a todos los valores por defecto.",
     ['RECOMPILE_DATABASE_BTN'] = "Recompilar base de datos",
     ['RECOMPILE_DATABASE_BTN_DESC'] = "Fuerza una recompilación de la base de datos Questie. Esto también volverá a cargar la interfaz de usuario.",
+    ['SHOW_PROFILER_BTN'] = "Abre el perfilador de Questie, esto es útil para rastrear la fuente de picos de latencia.",
+    ['SHOW_PROFILER_BTN_DESC'] = "Open the Questie profiler, this is useful for tracking down the source of lag / frame spikes.",
     ['QUESTIE_DEV_MESSAGE'] = "Questie está bajo desarrollo activo para World of Warcraft: Classic. Por favor ve a Github para las versiones alfa o para reportar problemas. O únete a nuestro Discord! (( https://github.com/AeroScripts/QuestieDev/ ))",
 
     -- UI Elements
@@ -192,7 +209,7 @@ QuestieLocale.locale['esES'] = {
     ['ICON_LEFT_CLICK_HOLD'] = "Clic izquierdo + Mantener",
     ['ICON_DRAG_LOCKED'] = "Arrastra mientras está bloqueado",
     ['ICON_TOGGLE'] = "Mostrar opciones",
-    ['ICON_SHIFTLEFT_CLICK'] = "Shift + Clic izq.",
+    ['ICON_SHIFTLEFT_CLICK'] = "Ctrl + Shift + Clic izq.",
     ['ICON_TOGGLE_QUESTIE'] = "Mostrar Questie",
     ['ICON_CTRLRIGHT_CLICK'] = "Ctrl + Clic der.",
     ['ICON_CTRLLEFT_CLICK'] = "Ctrl + Clic izq.",
@@ -212,6 +229,8 @@ QuestieLocale.locale['esES'] = {
     ['TOOLTIP_QUEST_REPEATABLE'] = "(Repetible)",
     ['TOOLTIP_QUEST_EVENT'] = "(Evento)",
     ['XP'] = "xp";
+    ['COMPLETE'] = "Completo";
+    ['FAILED'] = "Fracasado";
 
     -- Slash Commands
     ['SLASH_INVALID'] = "Comando inválido. Para una lista de comandos escribe: ",
@@ -346,7 +365,7 @@ QuestieLocale.locale['esES'] = {
     ['TOOLTIPS_START_QUEST'] = 'Empezado por',
     ['TOOLTIPS_END_QUEST'] = 'Terminado por',
     ['TOOLTIPS_FOUND_QUEST'] = 'Encontrado en',
-    ['TOOLTIPS_REQUIRE_QUEST'] = 'Requisitos',
+    ['TOOLTIPS_REQUIRE_QUEST'] = 'Objetivo',
     ['TOOLTIPS_PROGRESS_QUEST'] = 'Progreso',
     ['TOOLTIPS_FIN_QUEST'] = '(Completada)',
     ['TOOLTIPS_REPEAT_QUEST'] = 'Esta misión es repetible.',
@@ -364,6 +383,8 @@ QuestieLocale.locale['esES'] = {
     ['JOURNEY_SELECT_HEAD'] = "Selecciona tu continente y zona",
     ['JOURNEY_SELECT_CONT'] = "Selecciona tu continente",
     ['JOURNEY_SELECT_ZONE'] = "Selecciona tu zona",
+    ['JOURNEY_SELECT_PROFESSION'] = "Select Your Profession",
+    ['JOURNEY_NO_QUESTS_FOUND'] = "No Quests found",
     ['JOURNEY_QUESTS'] = "Misiones de zona",
     ['JOURNEY_QUESTINFO'] = "Información de la misión",
     ['JOURNEY_START_NPC'] = "Información PNJ que empieza misión",
@@ -382,7 +403,7 @@ QuestieLocale.locale['esES'] = {
     ['JOURNEY_PREQUEST'] = "Misiones requisitas",
     ['JOURNEY_AUTO_QUEST'] = "Esta misión se completa automaticamente y no contiene objetivos.",
     ['JOURNEY_RECENT_EVENTS'] = "Tu historial reciente",
-    ['JOURNEY_LEVELUP'] = "¡Felicidades! has alcanzado %s !",
+    ['JOURNEY_LEVELUP'] = "¡Felicidades! has alcanzado %s!",
     ['JOURNEY_LEVELNUM'] = "Nivel %s",
     ['JOURNEY_LEVELREACH'] = "Alcanzaste el nivel %s",
     ['JOURNEY_QUEST_ACCEPT'] = "Aceptaste la misión %s",
@@ -392,7 +413,7 @@ QuestieLocale.locale['esES'] = {
     ['JOURNEY_NOTE_DESC'] = "Crea una nueva entrada en el tu viaje para recordar un momento especifico. Simplemente proporciona un titulo y una descripción y Questie lo recordará por ti",
     ['JOURNEY_NOTE_TITLE'] = "Nueva nota para: %s",
     ['JOURNEY_NOTE_ENTRY_TITLE'] = "Título",
-    ['JOUNREY_NOTE_ENTRY_BODY'] = "Entrada de viaje",
+    ['JOURNEY_NOTE_ENTRY_BODY'] = "Entrada de viaje",
     ['JOURNEY_NOTE_SUBMIT_BTN'] = "Añadir entrada",
     ['JOURNEY_ERR_NOTITLE'] = "No has introducido un título. Tienes que introducir uno antes de crear tu nota.",
     ['JOURNEY_ERR_NONOTE'] = "No has introducido una nota. Tienes que introducir uno antes de crear tu nota.",
@@ -412,6 +433,10 @@ QuestieLocale.locale['esES'] = {
     ['JOURNEY_SEARCH_EXE'] = "Buscar",
     ['JOURNEY_SEARCH_RESULTS'] = "Resultados de la búsqueda",
     ['JOURNEY_SEARCH_NOMATCH'] = "No hay resultados para tu búsqueda: %s",
+    ['JOURNEY_SEARCH_QUESTS'] = "Misiones",
+    ['JOURNEY_SEARCH_NPCS'] = "PNJs",
+    ['JOURNEY_SEARCH_OBJECTS'] = "Objetos",
+    ['JOURNEY_SEARCH_ITEMS'] = "Items",
 
     -- Debug Messages
     ['DEBUG_LOWLEVEL'] = "Misiones grises puestas a:",
@@ -439,6 +464,46 @@ QuestieLocale.locale['esES'] = {
     ['QUESTIE_ACCEPT_NIL'] = "|cFFFF0000Questie ERROR:|r Intento de aceptar misión nula! Puede que tengas /questie reload",
     ['QUESTIE_UPDATED_RESTART'] = "|cFFFF0000ADVERTENCIA!|r Has actualizado Questie sin reiniciar el juego, esto probablemente causará problemas. Reinicia el juego antes de continuar.",
 
+    -- Townsfolk related strings
+    ["Repair"] = "Reparación",
+    ["Auctioneer"] = "Subastador",
+    ["Banker"] = "Banquero",
+    ["Battlemaster"] = "Maestro de batalla",
+    ["Flight Master"] = "Maestro de vuelo",
+    ["Innkeeper"] = "Tabernero",
+    ["Weapon Master"] = "Maestro armero",
+    ["Reagents"] = "Componentes",
+    ["Class Trainer"] = "Instructor de clase",
+    ["Stable Master"] = "Maestro de establos",
+    ["Mailbox"] = "Buzón",
+    ["Spirit Healer"] = "Ángel de la Resurrección",
+    ["Available Quest"] = "Misión disponible",
+    ["Trivial Quest"] = "Misiones triviales",
+    ["Objective"] = "Objetivos",
+    ["Vendor"] = "Vendedor",
+    ["Profession Trainer"] = "Instructores de profesiones",
+    ["Questie Options"] = "Opciones de Questie",
+    ["Ammo"] = "Munición",
+    ["Pet Food"] = "Alimentar mascota",
+    ["Portal Trainer"] = "Instructor de portal",
+    ["Bags"] = "Bolsas", 	
+    ["Trade Goods"] = "Objetos comerciables",
+    ["Food"] = "Comida",
+    ["Drink"] = "Beber",
+    -- professions use their ID as the key for a much cleaner implementation. Translations for these are alerady in QuestieProfessions.lua
+    ["129"] = "Primeros auxilios",
+    ["164"] = "Herrería",
+    ["165"] = "Peletería",
+    ["171"] = "Alquimia",
+    ["182"] = "Herboristería",
+    ["185"] = "Cocina",
+    ["186"] = "Minería",
+    ["197"] = "Sastrería",
+    ["202"] = "Ingeniería",
+    ["333"] = "Encantamiento",
+    ["356"] = "Pesca",
+    ["393"] = "Desuello",
+
     -- TODO finally switch all keys to this style for code readability:
     ['Show on Map'] = "Mostrar en mapa",
     ['Remove from Map'] = "Quitar de mapa",
@@ -446,5 +511,13 @@ QuestieLocale.locale['esES'] = {
     ['Ends the following quests:'] = "Termina las siguientes misiones:",
     ['No quests to list.'] = "No hay misiones para enumerar.",
     ['No spawn data available.'] = "No hay datos de spawn disponibles.",
+    ['The database needs to be updated to change language. Press reload to apply the new language'] = "Es necesario actualizar la base de datos para cambiar el idioma. Presiona recargar para aplicar el nuevo idioma",
+    ['Reload UI'] = "Recargar IU",
+    ["\124cFFAAEEFFQuestie DB has updated!\124r\124cFFFF6F22 Data is being processed, this may take a few moments and cause some lag..."] = "\124cFFAAEEFF¡Questie DB se ha actualizado!\124r\124cFFFF6F22 Los datos se están procesando, esto puede demorar unos minutos y causar latencia...",
+    ["\124cFF4DDBFF [1/4] Updating NPCs..."] = "\124cFF4DDBFF [1/4] Actualizando PNJs...",
+    ["\124cFF4DDBFF [2/4] Updating objects..."] = "\124cFF4DDBFF [2/4] Actualizando objetos...",  
+    ["\124cFF4DDBFF [3/4] Updating quests..."] = "\124cFF4DDBFF [3/4] Actualizando misiones...",  
+    ["\124cFF4DDBFF [4/4] Updating items..."] = "\124cFF4DDBFF [4/4] Actualizando items...", 
+    ["\124cFFAAEEFFQuestie DB update complete!"] = "\124cFFAAEEFF¡Actualización de Questie DB completada!",
     ["Nearby"] = "Cerca de",
 };

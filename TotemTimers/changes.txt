@@ -1,3 +1,11 @@
+1.08
+    - Fixed Reincarnation maximum duration display
+    - Added pulse for Grounding Totem
+    - Changed pulse color to be more opaque and more visible
+1.07
+    - Added support for Enamored Water Spirit trinket, still needs testing
+    - Added castsequence macro
+    - Show number of ankhs in inventory on Reincarnation timer
 1.06
     - Fixed Frostbrand Weapon for weapon tracker
 1.05
