@@ -487,40 +487,6 @@ function NugEnergy.Initialize(self)
         end
         self:UNIT_MAXPOWER()
 
-    elseif class == "MAGE" and NugEnergyDB.mana then
-        self:RegisterEvent("SPELLS_CHANGED")
-        self.SPELLS_CHANGED = function(self)
-            if GetSpecialization() == 1 and NugEnergyDB.mana then
-                PowerFilter = "MANA"
-                PowerTypeIndex = Enum.PowerType.Mana
-                GetPower = ManaBarGetPower()
-                self:SetNormalColor()
-                self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
-                self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
-            else
-                self:Disable()
-            end
-            self:UPDATE_STEALTH()
-        end
-        self:SPELLS_CHANGED()
-
-    elseif class == "PALADIN" and NugEnergyDB.mana then
-        self:RegisterEvent("SPELLS_CHANGED")
-        self.SPELLS_CHANGED = function(self)
-            if GetSpecialization() == 1 and NugEnergyDB.mana then
-                PowerFilter = "MANA"
-                PowerTypeIndex = Enum.PowerType.Mana
-                GetPower = ManaBarGetPower()
-                self:SetNormalColor()
-                self:RegisterUnitEvent("UNIT_MAXPOWER", "player")
-                self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
-            else
-                self:Disable()
-            end
-            self:UPDATE_STEALTH()
-        end
-        self:SPELLS_CHANGED()
-
     elseif class == "DRUID" then
         self:RegisterEvent("UNIT_DISPLAYPOWER")
         self:RegisterEvent("UPDATE_STEALTH")
@@ -531,6 +497,7 @@ function NugEnergy.Initialize(self)
             PowerFilter = nil
             PowerTypeIndex = nil
             self:UnregisterEvent("UNIT_POWER_UPDATE")
+            self:UnregisterEvent("UNIT_POWER_FREQUENT")
             self:UnregisterEvent("UNIT_MAXPOWER")
             self:UnregisterEvent("PLAYER_REGEN_DISABLED")
             self:SetScript("OnUpdate", nil)
@@ -560,10 +527,14 @@ function NugEnergy.Initialize(self)
                 if isClassic and NugEnergyDB.enableClassicTicker then
                     GetPower = GetPower_ClassicRogueTicker(nil, 19, 0, false)
                     NugEnergy.UNIT_MAXPOWER = UNIT_MAXPOWER_ClassicTicker
+                    self:UnregisterEvent("UNIT_POWER_FREQUENT")
+                    self:SetScript("OnUpdate",self.UpdateEnergy)
                     ClassicTickerFrame:Enable()
                     self:UpdateBarEffects()
                 else
                     GetPower = RageBarGetPower(nil, 5, nil, true)
+                    self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
+                    self:SetScript("OnUpdate", nil)
                     if ClassicTickerFrame.isEnabled then
                         ClassicTickerFrame:Disable()
                         self:UpdateBarEffects()
@@ -576,7 +547,6 @@ function NugEnergy.Initialize(self)
                 self:UNIT_MAXPOWER()
                 self:RegisterEvent("PLAYER_REGEN_DISABLED")
                 self:UPDATE_STEALTH()
-                self:RegisterUnitEvent("UNIT_POWER_FREQUENT", "player")
             elseif newPowerType =="RAGE" and NugEnergyDB.rage then
                 PowerFilter = "RAGE"
                 PowerTypeIndex = Enum.PowerType.Rage
@@ -591,6 +561,7 @@ function NugEnergy.Initialize(self)
                 end
                 GetPower = RageBarGetPower(30, 10, nil, nil)
                 self:RegisterEvent("PLAYER_REGEN_DISABLED")
+                self:SetScript("OnUpdate", nil)
                 self:UNIT_MAXPOWER()
                 self:UPDATE_STEALTH()
             elseif newPowerType =="MANA" and isClassic then
