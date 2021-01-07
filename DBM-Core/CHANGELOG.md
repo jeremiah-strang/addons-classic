@@ -1,6 +1,7 @@
 # Deadly Boss Mods Core
 
-## [1.13.65-1-g281a292](https://github.com/DeadlyBossMods/DBM-Classic/tree/281a292fe498fb59236fd0d424c55f06ca4df710) (2021-01-06)
-[Full Changelog](https://github.com/DeadlyBossMods/DBM-Classic/compare/1.13.65...281a292fe498fb59236fd0d424c55f06ca4df710) [Previous Releases](https://github.com/DeadlyBossMods/DBM-Classic/releases)
+## [1.13.65-2-g8df40b9](https://github.com/DeadlyBossMods/DBM-Classic/tree/8df40b956c0227150957319eb640bda0c72e9191) (2021-01-07)
+[Full Changelog](https://github.com/DeadlyBossMods/DBM-Classic/compare/1.13.65...8df40b956c0227150957319eb640bda0c72e9191) [Previous Releases](https://github.com/DeadlyBossMods/DBM-Classic/releases)
 
+- Update localization.mx.lua (#661)  
 - Bump alpha  
