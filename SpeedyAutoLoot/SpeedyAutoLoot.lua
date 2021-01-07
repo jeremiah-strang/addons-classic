@@ -193,7 +193,7 @@ function AutoLoot:OnEvent(e, ...)
 
         self:ShowLootFrame(false)
 
-        -- Workaround for TSM Destroy issue that TSM team won't fix.
+        -- Workaround for TSM Destroy issue
         if self.TSMLoaded and TSMDestroyBtn and TSMDestroyBtn:IsVisible() then
             C_Timer.NewTicker(0, function() SlashCmdList.TSM("destroy") end, 2)
         end
